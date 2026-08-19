@@ -1,0 +1,4 @@
+# Default ModelBench configuration
+project_name: modelbench
+log_level: INFO
+data_dir: datasets
