@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from modelbench.config import Config, GenerationConfig, ModelConfig, load_config
+from modelbench.config import Config, load_config
 
 
 class TestConfigDefaults:
@@ -67,10 +67,7 @@ class TestLoadConfig:
     def test_load_model_section(self, tmp_path: Path) -> None:
         config_file = tmp_path / "test.yaml"
         config_file.write_text(
-            "model:\n"
-            "  model_id: meta-llama/Llama-3-8B\n"
-            "  device: cpu\n"
-            "  dtype: float32\n"
+            "model:\n  model_id: meta-llama/Llama-3-8B\n  device: cpu\n  dtype: float32\n"
         )
         config = load_config(config_file)
         assert config.model.model_id == "meta-llama/Llama-3-8B"
@@ -82,10 +79,7 @@ class TestLoadConfig:
     def test_load_generation_section(self, tmp_path: Path) -> None:
         config_file = tmp_path / "test.yaml"
         config_file.write_text(
-            "generation:\n"
-            "  max_new_tokens: 512\n"
-            "  temperature: 0.7\n"
-            "  do_sample: true\n"
+            "generation:\n  max_new_tokens: 512\n  temperature: 0.7\n  do_sample: true\n"
         )
         config = load_config(config_file)
         assert config.generation.max_new_tokens == 512

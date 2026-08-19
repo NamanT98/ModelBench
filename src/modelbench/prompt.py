@@ -30,13 +30,4 @@ def build_text_to_sql_prompt(question: str, schema: str) -> str:
     Returns:
         A fully formed prompt string ready for the model.
     """
-    return (
-        f"{_SYSTEM_INSTRUCTION}\n"
-        f"\n"
-        f"Database schema:\n"
-        f"{schema}\n"
-        f"\n"
-        f"Question: {question}\n"
-        f"\n"
-        f"SQL:"
-    )
+    return f"{_SYSTEM_INSTRUCTION}\n\nDatabase schema:\n{schema}\n\nQuestion: {question}\n\nSQL:"

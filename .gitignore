@@ -42,3 +42,6 @@ datasets/*.sqlite
 # MLflow (future)
 mlruns/
 mlartifacts/
+
+results/
+datasets/spider

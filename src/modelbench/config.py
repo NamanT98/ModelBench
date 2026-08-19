@@ -26,6 +26,39 @@ _VALID_DTYPES = {"auto", "float16", "float32", "bfloat16"}
 
 
 @dataclass
+class DatasetConfig:
+    """Configuration for a dataset."""
+
+    name: str = "spider"
+    split: str = "dev"
+    limit: int | None = None
+    seed: int | None = None
+    path: str | None = None
+
+
+@dataclass
+class SchemaConfig:
+    """Configuration for schema extraction/retrieval."""
+
+    strategy: str = "full"
+
+
+@dataclass
+class StrategyConfig:
+    """Configuration for the overall prompting strategy."""
+
+    name: str = "zero_shot"
+
+
+@dataclass
+class ExperimentConfig:
+    """Configuration identifying an experiment run."""
+
+    name: str = "default_experiment"
+    seed: int | None = 42
+
+
+@dataclass
 class ModelConfig:
     """Configuration for the inference model.
 
@@ -54,13 +87,11 @@ class ModelConfig:
             raise ValueError("model_id must not be empty")
         if self.device not in _VALID_DEVICES:
             raise ValueError(
-                f"Unsupported device: {self.device!r}. "
-                f"Must be one of: {sorted(_VALID_DEVICES)}"
+                f"Unsupported device: {self.device!r}. Must be one of: {sorted(_VALID_DEVICES)}"
             )
         if self.dtype not in _VALID_DTYPES:
             raise ValueError(
-                f"Unsupported dtype: {self.dtype!r}. "
-                f"Must be one of: {sorted(_VALID_DTYPES)}"
+                f"Unsupported dtype: {self.dtype!r}. Must be one of: {sorted(_VALID_DTYPES)}"
             )
 
 
@@ -96,8 +127,12 @@ class Config:
     log_level: str = "INFO"
     data_dir: str = "datasets"
 
+    experiment: ExperimentConfig = field(default_factory=ExperimentConfig)
+    dataset: DatasetConfig = field(default_factory=DatasetConfig)
     model: ModelConfig = field(default_factory=ModelConfig)
     generation: GenerationConfig = field(default_factory=GenerationConfig)
+    schema: SchemaConfig = field(default_factory=SchemaConfig)
+    strategy: StrategyConfig = field(default_factory=StrategyConfig)
 
     # Allow arbitrary extra keys from config files without breaking
     extra: dict[str, Any] = field(default_factory=dict)
@@ -107,8 +142,12 @@ class Config:
 
 # Fields that are handled as nested dataclass sections
 _NESTED_SECTIONS: dict[str, type] = {
+    "experiment": ExperimentConfig,
+    "dataset": DatasetConfig,
     "model": ModelConfig,
     "generation": GenerationConfig,
+    "schema": SchemaConfig,
+    "strategy": StrategyConfig,
 }
 
 # Flat fields on Config (excluding nested sections and extra)

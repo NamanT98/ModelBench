@@ -61,7 +61,7 @@ def _describe_table(conn: sqlite3.Connection, table: str) -> str:
     lines = [f"Table {table}:"]
 
     # Columns via PRAGMA table_info
-    cursor = conn.execute(f"PRAGMA table_info({table})")  # noqa: S608
+    cursor = conn.execute(f"PRAGMA table_info({table})")
     for row in cursor.fetchall():
         # row: (cid, name, type, notnull, dflt_value, pk)
         col_name = row[1]
@@ -70,7 +70,7 @@ def _describe_table(conn: sqlite3.Connection, table: str) -> str:
         lines.append(f"  {col_name} {col_type}{pk_suffix}")
 
     # Foreign keys via PRAGMA foreign_key_list
-    cursor = conn.execute(f"PRAGMA foreign_key_list({table})")  # noqa: S608
+    cursor = conn.execute(f"PRAGMA foreign_key_list({table})")
     fks = cursor.fetchall()
     for fk in fks:
         # fk: (id, seq, ref_table, from_col, to_col, on_update, on_delete, match)

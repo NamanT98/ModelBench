@@ -75,3 +75,53 @@ class GenerationResult:
     input_tokens: int | None = None
     output_tokens: int | None = None
 
+
+@dataclass(frozen=True)
+class ExperimentMetadata:
+    """Metadata describing an experiment run."""
+
+    experiment_name: str
+    dataset: str
+    split: str
+    limit: int | None
+    seed: int | None
+    model_id: str
+    model_revision: str
+    schema_strategy: str
+    prompting_strategy: str
+    generation_config: dict[str, str | int | float | bool | None]
+
+
+@dataclass(frozen=True)
+class SampleResult:
+    """Detailed result for a single sample in an experiment."""
+
+    sample_id: str
+    db_id: str
+    question: str
+    gold_sql: str
+    generated_text: str
+    extracted_sql: str | None
+    sql_valid: bool
+    exact_match: bool
+    execution_accuracy: bool
+    execution_error: str | None
+    latency_seconds: float
+    input_tokens: int | None
+    output_tokens: int | None
+
+
+@dataclass(frozen=True)
+class ExperimentResult:
+    """The aggregate result of an experiment."""
+
+    metadata: ExperimentMetadata
+    total_samples: int
+    valid_sql_count: int
+    exact_match_count: int
+    execution_correct_count: int
+    sql_validity_rate: float
+    exact_match_rate: float
+    execution_accuracy: float
+    avg_latency_seconds: float
+    samples: list[SampleResult]

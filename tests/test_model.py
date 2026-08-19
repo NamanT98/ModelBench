@@ -13,7 +13,6 @@ from modelbench.config import GenerationConfig, ModelConfig
 from modelbench.model import HuggingFaceCausalLM, Model, create_model
 from modelbench.types import GenerationResult
 
-
 # ── Fake model for protocol tests ───────────────────────────────────
 
 

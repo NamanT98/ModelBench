@@ -37,9 +37,6 @@ def info() -> None:
 def evaluate_fixture() -> None:
     """Run the built-in fixture evaluation to verify the pipeline.
 
-    Creates a temporary SQLite database, evaluates 5 predefined
-    Text-to-SQL samples, and prints aggregate metrics.
-
     This is an internal development fixture, NOT a real benchmark.
     """
     from modelbench.evaluation import evaluate_sample
@@ -54,9 +51,7 @@ def evaluate_fixture() -> None:
         click.echo()
 
         results = []
-        for i, (sample, predicted) in enumerate(
-            zip(samples, FIXTURE_PREDICTIONS, strict=True), 1
-        ):
+        for i, (sample, predicted) in enumerate(zip(samples, FIXTURE_PREDICTIONS, strict=True), 1):
             result = evaluate_sample(predicted, sample.gold_sql, sample.db_path)
             results.append(result)
 
@@ -69,7 +64,7 @@ def evaluate_fixture() -> None:
         _print_summary(results)
 
 
-@main.command("evaluate-model")
+@main.command("run")
 @click.option(
     "--config",
     "-c",
@@ -78,80 +73,69 @@ def evaluate_fixture() -> None:
     default=None,
     help="Path to a YAML configuration file.",
 )
-def evaluate_model(config_path: str | None) -> None:
-    """Run a model against the fixture benchmark.
+def run_experiment(config_path: str | None) -> None:
+    """Run a ModelBench experiment based on the provided configuration.
 
-    Loads the configured Hugging Face model, generates SQL for each
-    fixture sample, evaluates with the M1 engine, and prints results.
-
-    \b
     Example:
-        modelbench evaluate-model --config configs/qwen_fixture.yaml
+        modelbench run --config configs/qwen_spider_baseline.yaml
     """
     from modelbench.config import load_config
-    from modelbench.evaluation import evaluate_sample
-    from modelbench.extract import SQLExtractionError, extract_sql
-    from modelbench.fixture import create_fixture_db, get_fixture_samples
-    from modelbench.model import create_model
-    from modelbench.prompt import build_text_to_sql_prompt
-    from modelbench.schema import extract_schema_from_db
-    from modelbench.types import EvaluationResult
+    from modelbench.runner import ExperimentRunner
 
-    config = load_config(config_path)
-    model = create_model(config.model, config.generation)
+    # Load configuration
+    try:
+        config = load_config(config_path)
+    except Exception as e:
+        click.echo(f"Failed to load configuration: {e}", err=True)
+        raise click.Abort()
 
-    with tempfile.TemporaryDirectory() as tmpdir:
-        db_path = create_fixture_db(Path(tmpdir) / "fixture_ecommerce.db")
-        samples = get_fixture_samples(db_path)
-        schema = extract_schema_from_db(db_path)
+    click.echo("ModelBench Experiment")
+    click.echo("=====================")
+    click.echo()
+    click.echo(f"Experiment: {config.experiment.name}")
+    click.echo(f"Dataset:    {config.dataset.name}")
+    click.echo(f"Split:      {config.dataset.split}")
+    click.echo(f"Limit:      {config.dataset.limit or 'all'}")
+    click.echo(f"Seed:       {config.dataset.seed or config.experiment.seed or 'none'}")
+    click.echo(f"Model:      {config.model.model_id}")
+    click.echo(f"Schema:     {config.schema.strategy}")
+    click.echo(f"Strategy:   {config.strategy.name}")
+    click.echo()
 
-        click.echo("ModelBench Text-to-SQL Model Evaluation")
-        click.echo("=" * 44)
-        click.echo(f"Model:          {model.model_id}")
-        click.echo(f"Device:         {config.model.device}")
-        click.echo(f"Dtype:          {config.model.dtype}")
-        click.echo(f"Max new tokens: {config.generation.max_new_tokens}")
-        click.echo(f"Samples:        {len(samples)}")
-        click.echo()
+    try:
+        runner = ExperimentRunner(config)
+    except Exception as e:
+        click.echo(f"Failed to initialize runner: {e}", err=True)
+        raise click.Abort()
 
-        results: list[EvaluationResult] = []
-        latencies: list[float] = []
+    click.echo("Progress:")
+    try:
+        result = runner.run()
+    except Exception as e:
+        click.echo(f"Experiment failed during execution: {e}", err=True)
+        raise click.Abort()
 
-        for i, sample in enumerate(samples, 1):
-            prompt = build_text_to_sql_prompt(sample.question, schema)
-            gen_result = model.generate(prompt)
-            latencies.append(gen_result.latency_seconds)
+    click.echo()
+    click.echo("Results")
+    click.echo("-------")
+    click.echo(
+        f"SQL Validity:       {result.valid_sql_count}/{result.total_samples} ({result.sql_validity_rate * 100:.1f}%)"
+    )
+    click.echo(
+        f"Exact Match:        {result.exact_match_count}/{result.total_samples} ({result.exact_match_rate * 100:.1f}%)"
+    )
+    click.echo(
+        f"Execution Accuracy: {result.execution_correct_count}/{result.total_samples} ({result.execution_accuracy * 100:.1f}%)"
+    )
+    click.echo(f"Avg Latency:        {result.avg_latency_seconds:.2f}s")
+    click.echo()
 
-            try:
-                predicted_sql = extract_sql(gen_result.text)
-            except SQLExtractionError as e:
-                click.echo(f"  [FAIL] {i}. {sample.question}")
-                click.echo(f"         Extraction error: {e}")
-                click.echo(f"         Raw output: {gen_result.text!r}")
-                click.echo()
-                results.append(
-                    EvaluationResult(
-                        sql_valid=False,
-                        exact_match=False,
-                        execution_accuracy=False,
-                        execution_error=f"SQL extraction failed: {e}",
-                    )
-                )
-                continue
-
-            eval_result = evaluate_sample(predicted_sql, sample.gold_sql, sample.db_path)
-            results.append(eval_result)
-
-            status = "pass" if eval_result.execution_accuracy else "FAIL"
-            click.echo(f"  [{status}] {i}. {sample.question}")
-            click.echo(f"         SQL: {predicted_sql}")
-            click.echo(f"         Latency: {gen_result.latency_seconds:.2f}s")
-            if eval_result.execution_error:
-                click.echo(f"         Error: {eval_result.execution_error}")
-            click.echo()
-
-        click.echo("-" * 44)
-        _print_summary(results, latencies=latencies)
+    try:
+        saved_path = runner.save_result(result)
+        click.echo(f"Results:\n{saved_path}")
+    except Exception as e:
+        click.echo(f"Failed to save results: {e}", err=True)
+        raise click.Abort()
 
 
 def _print_summary(

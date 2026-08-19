@@ -1,0 +1,18 @@
+[
+  {
+    "db_id": "fixture_ecommerce",
+    "query": "SELECT COUNT(*) FROM customers",
+    "question": "How many customers are there?",
+    "query_toks": ["SELECT", "COUNT", "(", "*", ")", "FROM", "customers"],
+    "query_toks_no_value": ["select", "count", "(", "*", ")", "from", "customers"],
+    "question_toks": ["How", "many", "customers", "are", "there", "?"]
+  },
+  {
+    "db_id": "fixture_ecommerce",
+    "query": "SELECT name, price FROM products",
+    "question": "List all product names and prices.",
+    "query_toks": ["SELECT", "name", ",", "price", "FROM", "products"],
+    "query_toks_no_value": ["select", "name", ",", "price", "from", "products"],
+    "question_toks": ["List", "all", "product", "names", "and", "prices", "."]
+  }
+]
