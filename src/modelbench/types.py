@@ -57,3 +57,21 @@ class EvaluationResult:
     exact_match: bool
     execution_accuracy: bool
     execution_error: str | None = None
+
+
+@dataclass(frozen=True)
+class GenerationResult:
+    """Result of a single model generation call.
+
+    Attributes:
+        text: The generated text (raw model output before SQL extraction).
+        latency_seconds: Wall-clock time for generation in seconds.
+        input_tokens: Number of input tokens, if available.
+        output_tokens: Number of generated tokens, if available.
+    """
+
+    text: str
+    latency_seconds: float
+    input_tokens: int | None = None
+    output_tokens: int | None = None
+

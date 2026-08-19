@@ -2,7 +2,9 @@
 
 from pathlib import Path
 
-from modelbench.config import Config, load_config
+import pytest
+
+from modelbench.config import Config, GenerationConfig, ModelConfig, load_config
 
 
 class TestConfigDefaults:
@@ -23,6 +25,16 @@ class TestConfigDefaults:
     def test_extra_defaults_to_empty(self) -> None:
         config = Config()
         assert config.extra == {}
+
+    def test_default_model_config(self) -> None:
+        config = Config()
+        assert config.model.provider == "huggingface"
+        assert config.model.model_id == "Qwen/Qwen2.5-Coder-3B-Instruct"
+
+    def test_default_generation_config(self) -> None:
+        config = Config()
+        assert config.generation.max_new_tokens == 256
+        assert config.generation.do_sample is False
 
 
 class TestLoadConfig:
@@ -51,3 +63,66 @@ class TestLoadConfig:
         config_file.write_text("")
         config = load_config(config_file)
         assert config.project_name == "modelbench"
+
+    def test_load_model_section(self, tmp_path: Path) -> None:
+        config_file = tmp_path / "test.yaml"
+        config_file.write_text(
+            "model:\n"
+            "  model_id: meta-llama/Llama-3-8B\n"
+            "  device: cpu\n"
+            "  dtype: float32\n"
+        )
+        config = load_config(config_file)
+        assert config.model.model_id == "meta-llama/Llama-3-8B"
+        assert config.model.device == "cpu"
+        assert config.model.dtype == "float32"
+        # Unspecified fields should get defaults
+        assert config.model.provider == "huggingface"
+
+    def test_load_generation_section(self, tmp_path: Path) -> None:
+        config_file = tmp_path / "test.yaml"
+        config_file.write_text(
+            "generation:\n"
+            "  max_new_tokens: 512\n"
+            "  temperature: 0.7\n"
+            "  do_sample: true\n"
+        )
+        config = load_config(config_file)
+        assert config.generation.max_new_tokens == 512
+        assert config.generation.temperature == 0.7
+        assert config.generation.do_sample is True
+
+    def test_load_full_config(self, tmp_path: Path) -> None:
+        config_file = tmp_path / "full.yaml"
+        config_file.write_text(
+            "project_name: test_project\n"
+            "model:\n"
+            "  model_id: test/model\n"
+            "  device: cuda\n"
+            "generation:\n"
+            "  max_new_tokens: 128\n"
+        )
+        config = load_config(config_file)
+        assert config.project_name == "test_project"
+        assert config.model.model_id == "test/model"
+        assert config.model.device == "cuda"
+        assert config.generation.max_new_tokens == 128
+
+    def test_missing_model_section_uses_defaults(self, tmp_path: Path) -> None:
+        config_file = tmp_path / "test.yaml"
+        config_file.write_text("project_name: test\n")
+        config = load_config(config_file)
+        assert config.model.model_id == "Qwen/Qwen2.5-Coder-3B-Instruct"
+        assert config.generation.max_new_tokens == 256
+
+    def test_invalid_model_config_raises(self, tmp_path: Path) -> None:
+        config_file = tmp_path / "bad.yaml"
+        config_file.write_text("model:\n  provider: openai\n")
+        with pytest.raises(ValueError, match="Unsupported provider"):
+            load_config(config_file)
+
+    def test_invalid_generation_config_raises(self, tmp_path: Path) -> None:
+        config_file = tmp_path / "bad.yaml"
+        config_file.write_text("generation:\n  max_new_tokens: 0\n")
+        with pytest.raises(ValueError, match="max_new_tokens must be >= 1"):
+            load_config(config_file)

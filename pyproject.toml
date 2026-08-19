@@ -24,6 +24,13 @@ dev = [
     "pytest-cov>=5.0",
     "ruff>=0.5",
 ]
+inference = [
+    "transformers>=4.40",
+    "torch>=2.0",
+]
+all = [
+    "modelbench[dev,inference]",
+]
 
 [project.scripts]
 modelbench = "modelbench.cli:main"

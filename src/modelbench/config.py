@@ -1,4 +1,9 @@
-"""Configuration management for ModelBench."""
+"""Configuration management for ModelBench.
+
+Supports flat application settings and nested sections for model
+inference and generation parameters.  Unknown YAML keys are collected
+into ``extra`` rather than raising, so configs remain forward-compatible.
+"""
 
 from __future__ import annotations
 
@@ -13,6 +18,75 @@ logger = logging.getLogger(__name__)
 
 _DEFAULT_CONFIG_FILENAME = "modelbench.yaml"
 
+# ── Nested config sections ──────────────────────────────────────────
+
+_VALID_PROVIDERS = {"huggingface"}
+_VALID_DEVICES = {"auto", "cpu", "cuda"}
+_VALID_DTYPES = {"auto", "float16", "float32", "bfloat16"}
+
+
+@dataclass
+class ModelConfig:
+    """Configuration for the inference model.
+
+    Attributes:
+        provider: Model backend. Currently only ``"huggingface"``.
+        model_id: Hugging Face model identifier (e.g. ``"Qwen/Qwen2.5-Coder-3B-Instruct"``).
+        revision: Model revision / git branch.
+        device: ``"auto"`` (CUDA if available, else CPU), ``"cpu"``, or ``"cuda"``.
+        dtype: ``"auto"`` (float16 on CUDA, float32 on CPU), ``"float16"``,
+            ``"float32"``, or ``"bfloat16"``.
+    """
+
+    provider: str = "huggingface"
+    model_id: str = "Qwen/Qwen2.5-Coder-3B-Instruct"
+    revision: str = "main"
+    device: str = "auto"
+    dtype: str = "auto"
+
+    def __post_init__(self) -> None:
+        if self.provider not in _VALID_PROVIDERS:
+            raise ValueError(
+                f"Unsupported provider: {self.provider!r}. "
+                f"Must be one of: {sorted(_VALID_PROVIDERS)}"
+            )
+        if not self.model_id:
+            raise ValueError("model_id must not be empty")
+        if self.device not in _VALID_DEVICES:
+            raise ValueError(
+                f"Unsupported device: {self.device!r}. "
+                f"Must be one of: {sorted(_VALID_DEVICES)}"
+            )
+        if self.dtype not in _VALID_DTYPES:
+            raise ValueError(
+                f"Unsupported dtype: {self.dtype!r}. "
+                f"Must be one of: {sorted(_VALID_DTYPES)}"
+            )
+
+
+@dataclass
+class GenerationConfig:
+    """Parameters for text generation.
+
+    Attributes:
+        max_new_tokens: Maximum number of new tokens to generate.
+        temperature: Sampling temperature (only used when ``do_sample=True``).
+        do_sample: Whether to use sampling. ``False`` means greedy decoding.
+    """
+
+    max_new_tokens: int = 256
+    temperature: float = 0.0
+    do_sample: bool = False
+
+    def __post_init__(self) -> None:
+        if self.max_new_tokens < 1:
+            raise ValueError(f"max_new_tokens must be >= 1, got {self.max_new_tokens}")
+        if self.temperature < 0:
+            raise ValueError(f"temperature must be >= 0, got {self.temperature}")
+
+
+# ── Top-level config ────────────────────────────────────────────────
+
 
 @dataclass
 class Config:
@@ -22,8 +96,35 @@ class Config:
     log_level: str = "INFO"
     data_dir: str = "datasets"
 
+    model: ModelConfig = field(default_factory=ModelConfig)
+    generation: GenerationConfig = field(default_factory=GenerationConfig)
+
     # Allow arbitrary extra keys from config files without breaking
     extra: dict[str, Any] = field(default_factory=dict)
+
+
+# ── Loading ─────────────────────────────────────────────────────────
+
+# Fields that are handled as nested dataclass sections
+_NESTED_SECTIONS: dict[str, type] = {
+    "model": ModelConfig,
+    "generation": GenerationConfig,
+}
+
+# Flat fields on Config (excluding nested sections and extra)
+_FLAT_FIELDS = {"project_name", "log_level", "data_dir"}
+
+
+def _build_nested(cls: type, raw: dict[str, Any] | None) -> Any:
+    """Construct a nested config dataclass from a raw dict."""
+    if not raw or not isinstance(raw, dict):
+        return cls()
+    known_fields = {f.name for f in cls.__dataclass_fields__.values()}
+    known = {k: v for k, v in raw.items() if k in known_fields}
+    unknown = {k for k in raw if k not in known_fields}
+    if unknown:
+        logger.warning("Unknown config keys for %s: %s", cls.__name__, sorted(unknown))
+    return cls(**known)
 
 
 def load_config(path: Path | str | None = None) -> Config:
@@ -33,6 +134,9 @@ def load_config(path: Path | str | None = None) -> Config:
       1. Explicit ``path`` argument.
       2. ``modelbench.yaml`` in the current working directory.
       3. Fall back to defaults.
+
+    Nested sections (``model``, ``generation``) are parsed into their
+    respective dataclass types with validation.
 
     Args:
         path: Optional explicit path to a YAML config file.
@@ -49,8 +153,13 @@ def load_config(path: Path | str | None = None) -> Config:
         logger.debug("No config file found at %s, using defaults", config_path)
         raw = {}
 
-    known_fields = {f.name for f in Config.__dataclass_fields__.values() if f.name != "extra"}
-    known = {k: v for k, v in raw.items() if k in known_fields}
-    extra = {k: v for k, v in raw.items() if k not in known_fields}
+    # Pop and build nested sections
+    nested = {}
+    for key, cls in _NESTED_SECTIONS.items():
+        nested[key] = _build_nested(cls, raw.pop(key, None))
 
-    return Config(**known, extra=extra)
+    # Build flat fields + extras
+    known = {k: v for k, v in raw.items() if k in _FLAT_FIELDS}
+    extra = {k: v for k, v in raw.items() if k not in _FLAT_FIELDS}
+
+    return Config(**nested, **known, extra=extra)
