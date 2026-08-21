@@ -1,0 +1,24 @@
+experiment:
+  name: "spider_qwen_m4b1_full_dev"
+  description: "M4-B.1 schema linking (NLTK normalization) with Qwen-3B on full Spider dev"
+  seed: 42
+
+model:
+  model_id: "Qwen/Qwen2.5-Coder-3B-Instruct"
+
+dataset:
+  name: "spider"
+  path: "datasets/spider"
+  split: "dev"
+  # limit: 2 # Quick test
+
+schema:
+  strategy: "schema_linking_normalized"
+
+strategy:
+  name: "zero_shot"
+
+generation:
+  max_new_tokens: 256
+  temperature: 0.0
+  do_sample: false

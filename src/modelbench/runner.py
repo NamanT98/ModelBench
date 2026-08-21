@@ -6,6 +6,7 @@ import dataclasses
 import json
 import logging
 from pathlib import Path
+from tqdm import tqdm
 
 from modelbench.config import Config
 from modelbench.dataset import SpiderDataset
@@ -81,7 +82,9 @@ class ExperimentRunner:
         # Cache DatabaseSchema domain objects per db_path
         schema_cache: dict[Path, object] = {}
 
-        for sample in self.dataset.load():
+        # Convert iterator to list for tqdm to have a total length
+        samples_list = list(self.dataset.load())
+        for sample in tqdm(samples_list, desc="Running Experiment", unit="sample"):
             db_id = sample.db_id
             db_path_obj = Path(sample.db_path)
 

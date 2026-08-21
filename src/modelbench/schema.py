@@ -18,6 +18,15 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+try:
+    import nltk
+    from nltk.corpus import stopwords
+    from nltk.stem import WordNetLemmatizer
+except ImportError:
+    nltk = None
+    stopwords = None
+    WordNetLemmatizer = None
+
 # ── Domain Models ───────────────────────────────────────────────────
 
 
@@ -541,6 +550,148 @@ class SchemaLinkingStrategy(SchemaStrategy):
         return self._diagnostics
 
 
+# ── NLTK Normalized Linking ─────────────────────────────────────────
+
+def _ensure_nltk_resources() -> None:
+    """Ensure required NLTK data is available."""
+    if nltk is None:
+        raise ImportError("NLTK is not installed.")
+    try:
+        nltk.data.find('tokenizers/punkt_tab')
+        nltk.data.find('corpora/stopwords')
+        nltk.data.find('corpora/wordnet')
+    except LookupError:
+        nltk.download('punkt', quiet=True)
+        nltk.download('punkt_tab', quiet=True)
+        nltk.download('stopwords', quiet=True)
+        nltk.download('wordnet', quiet=True)
+        # also download omw-1.4 which is often required for wordnet lemmatizer
+        nltk.download('omw-1.4', quiet=True)
+
+def _nltk_tokenize_question(question: str) -> set[str]:
+    """Tokenize and normalize a natural-language question using NLTK."""
+    _ensure_nltk_resources()
+    
+    tokens = nltk.word_tokenize(question)
+    lemmatizer = WordNetLemmatizer()
+    stop_words = set(stopwords.words('english'))
+    
+    normalized_tokens = set()
+    for token in tokens:
+        token = token.lower()
+        if not token.isalnum():
+            continue
+        if token in stop_words:
+            continue
+        normalized_tokens.add(lemmatizer.lemmatize(token))
+        
+    return normalized_tokens
+
+
+def _nltk_tokenize_name(name: str) -> set[str]:
+    """Tokenize and normalize a schema identifier using NLTK.
+    
+    Handles snake_case, camelCase, and hyphens by substituting them
+    with spaces before passing to NLTK's word_tokenize.
+    """
+    _ensure_nltk_resources()
+        
+    # Split camelCase
+    spaced_name = re.sub(r'(?<=[a-z])(?=[A-Z])', ' ', name)
+    # Replace underscores and hyphens
+    spaced_name = spaced_name.replace('_', ' ').replace('-', ' ')
+    
+    tokens = nltk.word_tokenize(spaced_name)
+    lemmatizer = WordNetLemmatizer()
+    stop_words = set(stopwords.words('english'))
+    
+    normalized = set()
+    for token in tokens:
+        token = token.lower()
+        if not token.isalnum():
+            continue
+        if token in stop_words:
+            continue
+        normalized.add(lemmatizer.lemmatize(token))
+        
+    return normalized
+
+
+def _nltk_name_matches_tokens(name: str, question_tokens: set[str]) -> bool:
+    """Check whether a schema name has an NLTK normalized overlap with question tokens."""
+    name_tokens = _nltk_tokenize_name(name)
+    return bool(name_tokens & question_tokens)
+
+
+class NormalizedSchemaLinkingStrategy(SchemaStrategy):
+    """M4-B.1: NLTK-Normalized deterministic schema linking.
+    
+    Uses standard NLP tokenization, stopword removal, and lemmatization
+    to increase recall over simple lexical matching.
+    """
+
+    def __init__(self) -> None:
+        self._diagnostics: SchemaDiagnostics | None = None
+
+    def get_schema_string(self, db_schema: DatabaseSchema, question: str) -> str:
+        question_tokens = _nltk_tokenize_question(question)
+        selected_tables: list[Table] = []
+
+        for table in db_schema.tables:
+            table_matches = _nltk_name_matches_tokens(table.name, question_tokens)
+
+            # Select columns that match the question
+            matched_cols: list[Column] = []
+            for col in table.columns:
+                if _nltk_name_matches_tokens(col.name, question_tokens):
+                    matched_cols.append(col)
+
+            if table_matches:
+                # Include all columns for matched tables
+                selected_tables.append(table)
+            elif matched_cols:
+                # Include the table but only with matched columns + PKs
+                pk_cols = [c for c in table.columns if c.is_primary_key]
+                combined = {c.name: c for c in pk_cols}
+                for c in matched_cols:
+                    combined[c.name] = c
+                selected_tables.append(
+                    Table(
+                        name=table.name,
+                        columns=tuple(combined.values()),
+                        foreign_keys=table.foreign_keys,
+                    )
+                )
+
+        linking_success = len(selected_tables) > 0
+
+        # Build the schema string using the same format logic as M4-B
+        result = SchemaLinkingStrategy._format_linked_schema(self, selected_tables, db_schema)
+
+        total_original_cols = db_schema.total_column_count
+        selected_col_count = sum(len(t.columns) for t in selected_tables)
+        if total_original_cols > 0:
+            reduction = 1.0 - (selected_col_count / total_original_cols)
+        else:
+            reduction = 0.0
+
+        self._diagnostics = SchemaDiagnostics(
+            original_table_count=len(db_schema.tables),
+            selected_table_count=len(selected_tables),
+            selected_column_count=selected_col_count,
+            schema_string_length=len(result),
+            schema_reduction_ratio=round(reduction, 4),
+            linking_success=linking_success,
+            fallback_used=False,
+        )
+        return result
+
+    def get_diagnostics(self) -> SchemaDiagnostics:
+        if self._diagnostics is None:
+            raise RuntimeError("get_schema_string must be called before get_diagnostics")
+        return self._diagnostics
+
+
 class FKExpandedSchemaLinkingStrategy(SchemaStrategy):
     """M4-C: Schema linking with FK-graph expansion.
 
@@ -710,6 +861,7 @@ def create_schema_strategy(strategy_name: str, **kwargs: Any) -> SchemaStrategy:
         "full": FullSchemaStrategy,
         "structured_full": StructuredFullSchemaStrategy,
         "schema_linking": SchemaLinkingStrategy,
+        "schema_linking_normalized": NormalizedSchemaLinkingStrategy,
         "schema_linking_fk": FKExpandedSchemaLinkingStrategy,
     }
     cls = strategies.get(strategy_name)
