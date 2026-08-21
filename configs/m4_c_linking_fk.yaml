@@ -1,0 +1,29 @@
+experiment:
+  name: spider_qwen_linking_fk
+  seed: 42
+
+dataset:
+  name: spider
+  split: dev
+  limit: 20
+  seed: 42
+  path: datasets/spider
+
+model:
+  provider: huggingface
+  model_id: Qwen/Qwen2.5-Coder-3B-Instruct
+  revision: main
+  device: auto
+  dtype: auto
+
+generation:
+  max_new_tokens: 256
+  temperature: 0.0
+  do_sample: false
+
+schema:
+  strategy: schema_linking_fk
+  max_fk_depth: 1
+
+strategy:
+  name: zero_shot

@@ -41,6 +41,7 @@ class SchemaConfig:
     """Configuration for schema extraction/retrieval."""
 
     strategy: str = "full"
+    max_fk_depth: int = 1
 
 
 @dataclass

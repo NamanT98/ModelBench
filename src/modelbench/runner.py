@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import dataclasses
 import json
 import logging
 from pathlib import Path
@@ -12,7 +13,7 @@ from modelbench.evaluation import evaluate_sample
 from modelbench.extract import SQLExtractionError, extract_sql
 from modelbench.model import create_model
 from modelbench.prompt import build_text_to_sql_prompt
-from modelbench.schema import extract_schema_from_db
+from modelbench.schema import create_schema_strategy, introspect_database
 from modelbench.types import ExperimentMetadata, ExperimentResult, SampleResult
 
 logger = logging.getLogger(__name__)
@@ -35,6 +36,12 @@ class ExperimentRunner:
 
         self.dataset = SpiderDataset(self.config.dataset)
         self._model = None
+
+        # Instantiate the schema strategy from config
+        self.schema_strategy = create_schema_strategy(
+            self.config.schema.strategy,
+            max_fk_depth=self.config.schema.max_fk_depth,
+        )
 
     @property
     def model(self):
@@ -71,37 +78,38 @@ class ExperimentRunner:
 
         sample_results: list[SampleResult] = []
 
-        # Keep track of schemas to avoid re-extracting for the same DB
-        schema_cache: dict[Path, str] = {}
+        # Cache DatabaseSchema domain objects per db_path
+        schema_cache: dict[Path, object] = {}
 
         for sample in self.dataset.load():
             db_id = sample.db_id
             db_path_obj = Path(sample.db_path)
 
-            # 1. Schema Generation
-            if self.config.schema.strategy != "full":
-                raise ValueError(f"Unsupported schema strategy: {self.config.schema.strategy}")
-
+            # 1. Schema Introspection (cached per database)
             if db_path_obj not in schema_cache:
                 try:
-                    schema_cache[db_path_obj] = extract_schema_from_db(db_path_obj)
+                    schema_cache[db_path_obj] = introspect_database(db_path_obj)
                 except Exception as e:
-                    logger.error("Failed to extract schema for %s: %s", db_path_obj, e)
-                    # Proceed with empty schema if extraction fails to gracefully record failure
-                    schema_cache[db_path_obj] = ""
+                    logger.error("Failed to introspect schema for %s: %s", db_path_obj, e)
+                    schema_cache[db_path_obj] = None
 
-            schema = schema_cache[db_path_obj]
+            db_schema = schema_cache[db_path_obj]
 
-            # 2. Prompt Building
-            if self.config.strategy.name != "zero_shot":
-                raise ValueError(f"Unsupported prompting strategy: {self.config.strategy.name}")
+            # 2. Schema Strategy → schema string
+            schema_str = ""
+            diag_dict = None
+            if db_schema is not None:
+                schema_str = self.schema_strategy.get_schema_string(db_schema, sample.question)
+                diag = self.schema_strategy.get_diagnostics()
+                diag_dict = dataclasses.asdict(diag)
 
-            prompt = build_text_to_sql_prompt(sample.question, schema)
+            # 3. Prompt Building
+            prompt = build_text_to_sql_prompt(sample.question, schema_str)
 
-            # 3. Generation
+            # 4. Generation
             gen_result = self.model.generate(prompt)
 
-            # 4. SQL Extraction
+            # 5. SQL Extraction & Evaluation
             extracted_sql = None
             sql_valid = False
             exact_match = False
@@ -111,7 +119,6 @@ class ExperimentRunner:
             try:
                 extracted_sql = extract_sql(gen_result.text)
 
-                # 5. Evaluation
                 eval_res = evaluate_sample(extracted_sql, sample.gold_sql, sample.db_path)
                 sql_valid = eval_res.sql_valid
                 exact_match = eval_res.exact_match
@@ -139,6 +146,7 @@ class ExperimentRunner:
                     latency_seconds=gen_result.latency_seconds,
                     input_tokens=gen_result.input_tokens,
                     output_tokens=gen_result.output_tokens,
+                    schema_diagnostics=diag_dict,
                 )
             )
 
@@ -170,10 +178,6 @@ class ExperimentRunner:
         out_dir.mkdir(parents=True, exist_ok=True)
 
         file_path = out_dir / f"{self.config.experiment.name}.json"
-
-        # Convert frozen dataclass to dict via custom serialization if needed,
-        # but since they only contain standard types, we can use built-in dataclass conversion.
-        import dataclasses
 
         with file_path.open("w", encoding="utf-8") as f:
             json.dump(dataclasses.asdict(result), f, indent=2)
