@@ -56,7 +56,11 @@ class ExperimentRunner:
             )
             train_dataset = SpiderDataset(train_config)
             train_samples = list(train_dataset.load())
-            self.retriever = create_retriever(self.config.strategy.retriever, train_samples)
+            self.retriever = create_retriever(
+                self.config.strategy.retriever, 
+                train_samples,
+                embedding_model=self.config.strategy.embedding_model
+            )
 
     @property
     def model(self):
@@ -148,8 +152,13 @@ class ExperimentRunner:
                 retrieval_diag = {
                     "k": self.config.strategy.k,
                     "retrieved": len(retrieved_samples),
-                    "latency_seconds": retrieval_latency,
+                    "latency_seconds": getattr(self.retriever, "last_retrieval_latency", retrieval_latency),
                 }
+                
+                if hasattr(self.retriever, "last_retrieval_scores"):
+                    retrieval_diag["scores"] = self.retriever.last_retrieval_scores
+                if hasattr(self.retriever, "embedding_model_id"):
+                    retrieval_diag["embedding_model"] = self.retriever.embedding_model_id
 
             prompt = build_text_to_sql_prompt(sample.question, schema_str, examples)
 

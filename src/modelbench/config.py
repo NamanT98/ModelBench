@@ -52,6 +52,7 @@ class StrategyConfig:
     retriever: str | None = None
     k: int = 3
     train_split: str = "train"
+    embedding_model: str | None = None
 
 
 @dataclass

@@ -29,6 +29,8 @@ dev = [
 inference = [
     "transformers>=4.40",
     "torch>=2.0",
+    "sentence-transformers>=2.7.0",
+    "numpy>=1.24.0",
 ]
 all = [
     "modelbench[dev,inference]",

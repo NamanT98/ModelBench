@@ -1,0 +1,27 @@
+experiment:
+  name: "spider_qwen_m6_embedding_full_dev"
+  description: "M6: Few-shot (k=3) retrieved examples with M4-B.1 schema linking using Embedding semantic similarity"
+  seed: 42
+
+model:
+  model_id: "Qwen/Qwen2.5-Coder-3B-Instruct"
+
+dataset:
+  name: "spider"
+  path: "datasets/spider"
+  split: "dev"
+
+schema:
+  strategy: "schema_linking_normalized"
+
+strategy:
+  name: "few_shot"
+  retriever: "embedding"
+  embedding_model: "BAAI/bge-small-en-v1.5"
+  k: 3
+  train_split: "train"
+
+generation:
+  max_new_tokens: 256
+  temperature: 0.0
+  do_sample: false
