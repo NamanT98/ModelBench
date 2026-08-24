@@ -1,6 +1,7 @@
 """Tests for the Text-to-SQL prompt builder."""
 
 from modelbench.prompt import build_text_to_sql_prompt
+from modelbench.types import TextToSQLSample
 
 
 class TestBuildPrompt:
@@ -34,3 +35,23 @@ class TestBuildPrompt:
         prompt = build_text_to_sql_prompt("Q?", "S")
         assert isinstance(prompt, str)
         assert len(prompt) > 0
+
+    def test_few_shot_examples(self) -> None:
+        examples = [
+            (TextToSQLSample("Q1", "db1", "db1", "SELECT * FROM t1"), "Schema1"),
+            (TextToSQLSample("Q2", "db2", "db2", "SELECT * FROM t2"), "Schema2"),
+        ]
+        prompt = build_text_to_sql_prompt("Q_target?", "Schema_target", examples)
+        
+        assert "EXAMPLE 1" in prompt
+        assert "Schema1" in prompt
+        assert "Q1" in prompt
+        assert "SELECT * FROM t1" in prompt
+        
+        assert "EXAMPLE 2" in prompt
+        assert "Schema2" in prompt
+        assert "Q2" in prompt
+        assert "SELECT * FROM t2" in prompt
+        
+        assert "Schema_target" in prompt
+        assert "TARGET QUESTION: Q_target?" in prompt

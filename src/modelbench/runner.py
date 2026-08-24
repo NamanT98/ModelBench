@@ -8,7 +8,7 @@ import logging
 from pathlib import Path
 from tqdm import tqdm
 
-from modelbench.config import Config
+from modelbench.config import Config, DatasetConfig
 from modelbench.dataset import SpiderDataset
 from modelbench.evaluation import evaluate_sample
 from modelbench.extract import SQLExtractionError, extract_sql
@@ -43,6 +43,20 @@ class ExperimentRunner:
             self.config.schema.strategy,
             max_fk_depth=self.config.schema.max_fk_depth,
         )
+
+        self.retriever = None
+        if self.config.strategy.name == "few_shot":
+            from modelbench.retrieval import create_retriever
+            
+            logger.info("Initializing few-shot retriever (strategy: %s)", self.config.strategy.retriever)
+            train_config = DatasetConfig(
+                name=self.config.dataset.name,
+                path=self.config.dataset.path,
+                split=self.config.strategy.train_split
+            )
+            train_dataset = SpiderDataset(train_config)
+            train_samples = list(train_dataset.load())
+            self.retriever = create_retriever(self.config.strategy.retriever, train_samples)
 
     @property
     def model(self):
@@ -107,7 +121,37 @@ class ExperimentRunner:
                 diag_dict = dataclasses.asdict(diag)
 
             # 3. Prompt Building
-            prompt = build_text_to_sql_prompt(sample.question, schema_str)
+            import time
+            examples = None
+            retrieval_diag = None
+            if self.retriever is not None:
+                start_retrieval = time.perf_counter()
+                retrieved_samples = self.retriever.retrieve(sample.question, self.config.strategy.k)
+                retrieval_latency = time.perf_counter() - start_retrieval
+                
+                examples = []
+                for ex_sample in retrieved_samples:
+                    ex_db_path_obj = Path(ex_sample.db_path)
+                    if ex_db_path_obj not in schema_cache:
+                        try:
+                            schema_cache[ex_db_path_obj] = introspect_database(ex_db_path_obj)
+                        except Exception as e:
+                            logger.error("Failed to introspect schema for %s: %s", ex_db_path_obj, e)
+                            schema_cache[ex_db_path_obj] = None
+                            
+                    ex_db_schema = schema_cache[ex_db_path_obj]
+                    ex_schema_str = ""
+                    if ex_db_schema is not None:
+                        ex_schema_str = self.schema_strategy.get_schema_string(ex_db_schema, ex_sample.question)
+                    examples.append((ex_sample, ex_schema_str))
+                    
+                retrieval_diag = {
+                    "k": self.config.strategy.k,
+                    "retrieved": len(retrieved_samples),
+                    "latency_seconds": retrieval_latency,
+                }
+
+            prompt = build_text_to_sql_prompt(sample.question, schema_str, examples)
 
             # 4. Generation
             gen_result = self.model.generate(prompt)
@@ -150,6 +194,7 @@ class ExperimentRunner:
                     input_tokens=gen_result.input_tokens,
                     output_tokens=gen_result.output_tokens,
                     schema_diagnostics=diag_dict,
+                    retrieval_diagnostics=retrieval_diag,
                 )
             )
 

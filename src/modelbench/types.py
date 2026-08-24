@@ -110,6 +110,7 @@ class SampleResult:
     input_tokens: int | None
     output_tokens: int | None
     schema_diagnostics: dict[str, object] | None = None
+    retrieval_diagnostics: dict[str, object] | None = None
 
 
 @dataclass(frozen=True)

@@ -16,18 +16,34 @@ _SYSTEM_INSTRUCTION = (
 )
 
 
-def build_text_to_sql_prompt(question: str, schema: str) -> str:
-    """Build a Text-to-SQL prompt from a question and schema.
+from modelbench.types import TextToSQLSample
 
-    The prompt structure is deterministic and designed for zero-shot
-    generation.  Few-shot examples will be added in a later milestone.
+def build_text_to_sql_prompt(
+    question: str, 
+    schema: str, 
+    examples: list[tuple[TextToSQLSample, str]] | None = None
+) -> str:
+    """Build a Text-to-SQL prompt from a question and schema.
 
     Args:
         question: The natural-language question to translate.
         schema: A text description of the database schema (as produced
             by :func:`modelbench.schema.extract_schema_from_db`).
+        examples: Optional list of tuples containing (demonstration sample, 
+            demonstration schema).
 
     Returns:
         A fully formed prompt string ready for the model.
     """
-    return f"{_SYSTEM_INSTRUCTION}\n\nDatabase schema:\n{schema}\n\nQuestion: {question}\n\nSQL:"
+    prompt = f"{_SYSTEM_INSTRUCTION}\n\n"
+    
+    if examples:
+        for i, (ex_sample, ex_schema) in enumerate(examples, 1):
+            prompt += f"EXAMPLE {i}:\n"
+            prompt += f"Database schema:\n{ex_schema}\n\n"
+            prompt += f"Question: {ex_sample.question}\n\n"
+            prompt += f"SQL: {ex_sample.gold_sql}\n\n"
+    
+    prompt += f"Database schema:\n{schema}\n\n"
+    prompt += f"TARGET QUESTION: {question}\n\nSQL:"
+    return prompt

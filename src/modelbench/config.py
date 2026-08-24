@@ -49,6 +49,9 @@ class StrategyConfig:
     """Configuration for the overall prompting strategy."""
 
     name: str = "zero_shot"
+    retriever: str | None = None
+    k: int = 3
+    train_split: str = "train"
 
 
 @dataclass

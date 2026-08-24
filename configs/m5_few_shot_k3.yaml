@@ -1,0 +1,26 @@
+experiment:
+  name: "spider_qwen_m5_fewshot_k3"
+  description: "M5: Few-shot (k=3) retrieved examples with M4-B.1 schema linking"
+  seed: 42
+
+model:
+  model_id: "Qwen/Qwen2.5-Coder-3B-Instruct"
+
+dataset:
+  name: "spider"
+  path: "datasets/spider"
+  split: "dev"
+
+schema:
+  strategy: "schema_linking_normalized"
+
+strategy:
+  name: "few_shot"
+  retriever: "jaccard_nltk"
+  k: 3
+  train_split: "train"
+
+generation:
+  max_new_tokens: 256
+  temperature: 0.0
+  do_sample: false
