@@ -252,6 +252,9 @@ class EmbeddingRetriever:
             except Exception as e:
                 logger.warning("Failed to save embedding cache: %s", e)
                 
+            # Move model to CPU after building index to free VRAM for the generator
+            self.model.cpu()
+                
     def retrieve_with_scores(self, question: str, k: int | None = None) -> list[tuple[TextToSQLSample, float]]:
         if self.index is None:
             return []
@@ -259,7 +262,8 @@ class EmbeddingRetriever:
         if self.model is None:
             if SentenceTransformer is None:
                 raise ImportError("sentence-transformers is required")
-            self.model = SentenceTransformer(self.embedding_model_id)
+            # Load directly to CPU for inference to preserve VRAM for the generator
+            self.model = SentenceTransformer(self.embedding_model_id, device="cpu")
             
         # Must normalize query for cosine similarity via dot product
         query_embedding = self.model.encode(question, normalize_embeddings=True)

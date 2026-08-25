@@ -1,6 +1,6 @@
 import tempfile
 
-from modelbench.config import Config, DatasetConfig, ExperimentConfig, ModelConfig
+from modelbench.config import Config, DatasetConfig, ExperimentConfig, ModelConfig, GenerationConfig
 from modelbench.runner import ExperimentRunner
 from modelbench.types import GenerationResult
 
@@ -8,6 +8,10 @@ from modelbench.types import GenerationResult
 class FakeModel:
     def __init__(self, *args, **kwargs):
         self.model_id = "fake-model"
+
+
+    def generate_batch(self, prompts: list[str]) -> list[GenerationResult]:
+        return [self.generate(p) for p in prompts]
 
     def generate(self, prompt: str) -> GenerationResult:
         # We know the fixture asks about customers
@@ -53,3 +57,23 @@ def test_experiment_runner(monkeypatch):
 
         assert data["total_samples"] == 2
         assert data["metadata"]["dataset"] == "spider"
+
+
+
+def test_experiment_runner_batching(monkeypatch):
+    monkeypatch.setattr("modelbench.runner.create_model", lambda *args: FakeModel())
+
+    config = Config(
+        experiment=ExperimentConfig(name="test_exp"),
+        dataset=DatasetConfig(name="spider", path="tests/data/spider_fixture", split="dev"),
+        model=ModelConfig(model_id="fake-model"),
+        generation=GenerationConfig(batch_size=2)
+    )
+
+    runner = ExperimentRunner(config)
+    result = runner.run()
+
+    assert result.total_samples == 2
+    assert result.valid_sql_count == 2
+    assert result.execution_correct_count == 2
+    assert result.exact_match_count == 2

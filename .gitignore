@@ -43,6 +43,5 @@ datasets/*.sqlite
 mlruns/
 mlartifacts/
 
-results/
 datasets/spider
 docs/

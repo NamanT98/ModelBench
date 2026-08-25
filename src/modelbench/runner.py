@@ -103,112 +103,143 @@ class ExperimentRunner:
         # Cache DatabaseSchema domain objects per db_path
         schema_cache: dict[Path, object] = {}
 
-        # Convert iterator to list for tqdm to have a total length
+        batch_size = getattr(self.config.generation, "batch_size", 1)
         samples_list = list(self.dataset.load())
-        for sample in tqdm(samples_list, desc="Running Experiment", unit="sample"):
-            db_id = sample.db_id
-            db_path_obj = Path(sample.db_path)
+        
+        # We still use tqdm, but over batches. We can set total=len(samples_list) 
+        # and update it manually to show samples progress, or just show batch progress.
+        # Let's show sample progress.
+        pbar = tqdm(total=len(samples_list), desc="Running Experiment", unit="sample")
+        
+        for batch_idx in range(0, len(samples_list), batch_size):
+            batch_samples = samples_list[batch_idx:batch_idx+batch_size]
+            
+            batch_prompts = []
+            batch_contexts = []
+            
+            for sample in batch_samples:
+                db_id = sample.db_id
+                db_path_obj = Path(sample.db_path)
 
-            # 1. Schema Introspection (cached per database)
-            if db_path_obj not in schema_cache:
-                try:
-                    schema_cache[db_path_obj] = introspect_database(db_path_obj)
-                except Exception as e:
-                    logger.error("Failed to introspect schema for %s: %s", db_path_obj, e)
-                    schema_cache[db_path_obj] = None
+                # 1. Schema Introspection (cached per database)
+                if db_path_obj not in schema_cache:
+                    try:
+                        schema_cache[db_path_obj] = introspect_database(db_path_obj)
+                    except Exception as e:
+                        logger.error("Failed to introspect schema for %s: %s", db_path_obj, e)
+                        schema_cache[db_path_obj] = None
 
-            db_schema = schema_cache[db_path_obj]
+                db_schema = schema_cache[db_path_obj]
 
-            # 2. Schema Strategy → schema string
-            schema_str = ""
-            diag_dict = None
-            if db_schema is not None:
-                schema_str = self.schema_strategy.get_schema_string(db_schema, sample.question)
-                diag = self.schema_strategy.get_diagnostics()
-                diag_dict = dataclasses.asdict(diag)
+                # 2. Schema Strategy → schema string
+                schema_str = ""
+                diag_dict = None
+                if db_schema is not None:
+                    schema_str = self.schema_strategy.get_schema_string(db_schema, sample.question)
+                    diag = self.schema_strategy.get_diagnostics()
+                    diag_dict = dataclasses.asdict(diag)
 
-            # 3. Prompt Building
-            import time
-            examples = None
-            retrieval_diag = None
-            if self.retriever is not None:
-                start_retrieval = time.perf_counter()
-                retrieval_response = self.retriever.retrieve(sample.question, self.config.strategy.k)
-                retrieval_latency = time.perf_counter() - start_retrieval
-                
-                if isinstance(retrieval_response, RetrievalResult):
-                    retrieved_samples = retrieval_response.samples
-                    retrieval_diag = retrieval_response.diagnostics
-                else:
-                    retrieved_samples = retrieval_response
-                    retrieval_diag = {
-                        "k": self.config.strategy.k,
-                        "retrieved": len(retrieved_samples),
-                        "latency_seconds": retrieval_latency,
-                    }
-                
-                examples = []
-                for ex_sample in retrieved_samples:
-                    ex_db_path_obj = Path(ex_sample.db_path)
-                    if ex_db_path_obj not in schema_cache:
-                        try:
-                            schema_cache[ex_db_path_obj] = introspect_database(ex_db_path_obj)
-                        except Exception as e:
-                            logger.error("Failed to introspect schema for %s: %s", ex_db_path_obj, e)
-                            schema_cache[ex_db_path_obj] = None
-                            
-                    ex_db_schema = schema_cache[ex_db_path_obj]
-                    ex_schema_str = ""
-                    if ex_db_schema is not None:
-                        ex_schema_str = self.schema_strategy.get_schema_string(ex_db_schema, ex_sample.question)
-                    examples.append((ex_sample, ex_schema_str))
+                # 3. Prompt Building
+                import time
+                examples = None
+                retrieval_diag = None
+                if self.retriever is not None:
+                    start_retrieval = time.perf_counter()
+                    retrieval_response = self.retriever.retrieve(sample.question, self.config.strategy.k)
+                    retrieval_latency = time.perf_counter() - start_retrieval
+                    
+                    if isinstance(retrieval_response, RetrievalResult):
+                        retrieved_samples = retrieval_response.samples
+                        retrieval_diag = retrieval_response.diagnostics
+                    else:
+                        retrieved_samples = retrieval_response
+                        retrieval_diag = {
+                            "k": self.config.strategy.k,
+                            "retrieved": len(retrieved_samples),
+                            "latency_seconds": retrieval_latency,
+                        }
+                    
+                    examples = []
+                    for ex_sample in retrieved_samples:
+                        ex_db_path_obj = Path(ex_sample.db_path)
+                        if ex_db_path_obj not in schema_cache:
+                            try:
+                                schema_cache[ex_db_path_obj] = introspect_database(ex_db_path_obj)
+                            except Exception as e:
+                                logger.error("Failed to introspect schema for %s: %s", ex_db_path_obj, e)
+                                schema_cache[ex_db_path_obj] = None
+                                
+                        ex_db_schema = schema_cache[ex_db_path_obj]
+                        ex_schema_str = ""
+                        if ex_db_schema is not None:
+                            ex_schema_str = self.schema_strategy.get_schema_string(ex_db_schema, ex_sample.question)
+                        examples.append((ex_sample, ex_schema_str))
 
-            prompt = build_text_to_sql_prompt(sample.question, schema_str, examples)
+                prompt = build_text_to_sql_prompt(sample.question, schema_str, examples)
+                batch_prompts.append(prompt)
+                batch_contexts.append({
+                    "sample": sample,
+                    "diag_dict": diag_dict,
+                    "retrieval_diag": retrieval_diag
+                })
 
             # 4. Generation
-            gen_result = self.model.generate(prompt)
+            if batch_size == 1:
+                # Backward-compatible single generation path
+                gen_results = [self.model.generate(batch_prompts[0])]
+            else:
+                # Batched generation path
+                gen_results = self.model.generate_batch(batch_prompts)
 
             # 5. SQL Extraction & Evaluation
-            extracted_sql = None
-            sql_valid = False
-            exact_match = False
-            exec_acc = False
-            exec_err = None
+            for ctx, gen_result in zip(batch_contexts, gen_results):
+                sample = ctx["sample"]
+                db_id = sample.db_id
+                
+                extracted_sql = None
+                sql_valid = False
+                exact_match = False
+                exec_acc = False
+                exec_err = None
 
-            try:
-                extracted_sql = extract_sql(gen_result.text)
+                try:
+                    extracted_sql = extract_sql(gen_result.text)
 
-                eval_res = evaluate_sample(extracted_sql, sample.gold_sql, sample.db_path)
-                sql_valid = eval_res.sql_valid
-                exact_match = eval_res.exact_match
-                exec_acc = eval_res.execution_accuracy
-                exec_err = eval_res.execution_error
-            except SQLExtractionError as e:
-                exec_err = f"Extraction failed: {e}"
-            except Exception as e:
-                exec_err = f"Evaluation failed: {e}"
+                    eval_res = evaluate_sample(extracted_sql, sample.gold_sql, sample.db_path)
+                    sql_valid = eval_res.sql_valid
+                    exact_match = eval_res.exact_match
+                    exec_acc = eval_res.execution_accuracy
+                    exec_err = eval_res.execution_error
+                except SQLExtractionError as e:
+                    exec_err = f"Extraction failed: {e}"
+                except Exception as e:
+                    exec_err = f"Evaluation failed: {e}"
 
-            sample_id = f"{db_id}_{len(sample_results)}"
+                sample_id = f"{db_id}_{len(sample_results)}"
 
-            sample_results.append(
-                SampleResult(
-                    sample_id=sample_id,
-                    db_id=db_id,
-                    question=sample.question,
-                    gold_sql=sample.gold_sql,
-                    generated_text=gen_result.text,
-                    extracted_sql=extracted_sql,
-                    sql_valid=sql_valid,
-                    exact_match=exact_match,
-                    execution_accuracy=exec_acc,
-                    execution_error=exec_err,
-                    latency_seconds=gen_result.latency_seconds,
-                    input_tokens=gen_result.input_tokens,
-                    output_tokens=gen_result.output_tokens,
-                    schema_diagnostics=diag_dict,
-                    retrieval_diagnostics=retrieval_diag,
+                sample_results.append(
+                    SampleResult(
+                        sample_id=sample_id,
+                        db_id=db_id,
+                        question=sample.question,
+                        gold_sql=sample.gold_sql,
+                        generated_text=gen_result.text,
+                        extracted_sql=extracted_sql,
+                        sql_valid=sql_valid,
+                        exact_match=exact_match,
+                        execution_accuracy=exec_acc,
+                        execution_error=exec_err,
+                        latency_seconds=gen_result.latency_seconds,
+                        input_tokens=gen_result.input_tokens,
+                        output_tokens=gen_result.output_tokens,
+                        schema_diagnostics=ctx["diag_dict"],
+                        retrieval_diagnostics=ctx["retrieval_diag"],
+                    )
                 )
-            )
+            
+            pbar.update(len(batch_samples))
+        
+        pbar.close()
 
         total_samples = len(sample_results)
         valid_count = sum(1 for r in sample_results if r.sql_valid)

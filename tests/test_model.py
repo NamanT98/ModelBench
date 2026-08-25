@@ -38,6 +38,12 @@ class FakeModel:
             output_tokens=len(response.split()),
         )
 
+    def generate_batch(self, prompts: list[str]) -> list[GenerationResult]:
+        results = []
+        for p in prompts:
+            results.append(self.generate(p))
+        return results
+
 
 # ── Model protocol tests ───────────────────────────────────────────
 
@@ -54,6 +60,15 @@ class TestModelProtocol:
         result = fake.generate("How many users?")
         assert result.text == "SELECT COUNT(*) FROM users"
         assert result.latency_seconds > 0
+
+
+    def test_fake_model_generate_batch(self) -> None:
+        fake = FakeModel(["A", "B", "C"])
+        results = fake.generate_batch(["p1", "p2", "p3"])
+        assert len(results) == 3
+        assert results[0].text == "A"
+        assert results[1].text == "B"
+        assert results[2].text == "C"
 
     def test_fake_model_id(self) -> None:
         fake = FakeModel(["x"], model_id="test/my-model")
@@ -99,6 +114,10 @@ class TestModelConfig:
     def test_invalid_provider_raises(self) -> None:
         with pytest.raises(ValueError, match="Unsupported provider"):
             ModelConfig(provider="openai")
+
+    def test_valid_providers(self) -> None:
+        assert ModelConfig(provider="huggingface").provider == "huggingface"
+        assert ModelConfig(provider="vllm").provider == "vllm"
 
     def test_empty_model_id_raises(self) -> None:
         with pytest.raises(ValueError, match="model_id must not be empty"):
@@ -170,6 +189,27 @@ class TestHuggingFaceCausalLM:
         assert model._gen_config.max_new_tokens == 512
 
 
+# ── VLLMModel construction tests ────────────────────────────────────────
+
+class TestVLLMModel:
+    """Test VLLMModel without loading any real model."""
+
+    def test_lazy_loading(self) -> None:
+        """Constructing the adapter must NOT load the model."""
+        from modelbench.model import VLLMModel
+        model = VLLMModel(ModelConfig(provider="vllm"), GenerationConfig())
+        assert model._llm is None
+        assert model._tokenizer is None
+
+    def test_model_id_property(self) -> None:
+        from modelbench.model import VLLMModel
+        model = VLLMModel(
+            ModelConfig(provider="vllm", model_id="custom/model"),
+            GenerationConfig(),
+        )
+        assert model.model_id == "custom/model"
+
+
 # ── create_model factory tests ──────────────────────────────────────
 
 
@@ -177,8 +217,14 @@ class TestCreateModel:
     """Test the model factory function."""
 
     def test_creates_huggingface_model(self) -> None:
-        model = create_model(ModelConfig(), GenerationConfig())
+        model = create_model(ModelConfig(provider="huggingface"), GenerationConfig())
         assert isinstance(model, HuggingFaceCausalLM)
+        assert model.model_id == "Qwen/Qwen2.5-Coder-3B-Instruct"
+
+    def test_creates_vllm_model(self) -> None:
+        from modelbench.model import VLLMModel
+        model = create_model(ModelConfig(provider="vllm"), GenerationConfig())
+        assert isinstance(model, VLLMModel)
         assert model.model_id == "Qwen/Qwen2.5-Coder-3B-Instruct"
 
     def test_unsupported_provider_raises(self) -> None:

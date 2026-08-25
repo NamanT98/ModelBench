@@ -9,7 +9,15 @@ commands like ``modelbench --help`` never trigger a multi-GB download.
 from __future__ import annotations
 
 import logging
+import os
 import time
+
+# Disable experimental vLLM V1 engine to prevent UVA errors on incompatible hardware
+os.environ["VLLM_USE_V1"] = "0"
+os.environ["VLLM_ENABLE_V1"] = "0"
+os.environ["VLLM_WSL2_ENABLE_PIN_MEMORY"] = "1"
+os.environ["VLLM_USE_FLASHINFER_SAMPLER"] = "0"
+
 from typing import Protocol, runtime_checkable
 
 from modelbench.config import GenerationConfig, ModelConfig
@@ -43,7 +51,17 @@ class Model(Protocol):
 
         Returns:
             A :class:`GenerationResult` with the generated text,
-            latency, and optional token counts.
+        """
+        ...
+
+    def generate_batch(self, prompts: list[str]) -> list[GenerationResult]:
+        """Generate text from a batch of prompts.
+
+        Args:
+            prompts: The list of input texts.
+
+        Returns:
+            A list of GenerationResult objects corresponding exactly to the inputs.
         """
         ...
 
@@ -129,9 +147,82 @@ class HuggingFaceCausalLM:
         return GenerationResult(
             text=text,
             latency_seconds=elapsed,
-            input_tokens=input_token_count,
             output_tokens=len(new_ids),
         )
+
+    def generate_batch(self, prompts: list[str]) -> list[GenerationResult]:
+        """Generate text from a batch of prompts.
+        
+        The outputs are returned in exactly the same order as the inputs.
+        Padding is applied to the left so that generation happens correctly.
+        """
+        if not prompts:
+            return []
+
+        self._ensure_loaded()
+        assert self._tokenizer is not None
+        assert self._hf_model is not None
+        assert self._device is not None
+
+        import torch
+
+        # Ensure padding tokens are set appropriately for batching
+        if self._tokenizer.pad_token is None:
+            self._tokenizer.pad_token = self._tokenizer.eos_token
+        self._tokenizer.padding_side = "left"
+
+        input_texts = []
+        if getattr(self._tokenizer, "chat_template", None):
+            for p in prompts:
+                messages = [{"role": "user", "content": p}]
+                input_texts.append(
+                    self._tokenizer.apply_chat_template(
+                        messages, tokenize=False, add_generation_prompt=True
+                    )
+                )
+        else:
+            input_texts = prompts
+
+        inputs = self._tokenizer(input_texts, return_tensors="pt", padding=True).to(self._device)
+        input_token_count = inputs["input_ids"].shape[1]
+
+        gen_kwargs: dict = {
+            "max_new_tokens": self._gen_config.max_new_tokens,
+        }
+        if self._gen_config.do_sample:
+            gen_kwargs["do_sample"] = True
+            gen_kwargs["temperature"] = self._gen_config.temperature
+        else:
+            gen_kwargs["do_sample"] = False
+
+        start = time.perf_counter()
+        with torch.no_grad():
+            output_ids = self._hf_model.generate(**inputs, **gen_kwargs)
+        elapsed = time.perf_counter() - start
+
+        results = []
+        for i in range(len(prompts)):
+            # Decode only the newly generated tokens
+            new_ids = output_ids[i][input_token_count:]
+            text = self._tokenizer.decode(new_ids, skip_special_tokens=True)
+            
+            # The true input token count for this specific sample before padding
+            actual_input_tokens = int(inputs["attention_mask"][i].sum().item())
+            
+            results.append(
+                GenerationResult(
+                    text=text,
+                    latency_seconds=elapsed,
+                    input_tokens=actual_input_tokens,
+                    output_tokens=len(new_ids),
+                )
+            )
+
+        del inputs
+        del output_ids
+        torch.cuda.empty_cache()
+
+        return results
 
     # ── Lazy loading internals ───────────────────────────────────
 
@@ -211,6 +302,134 @@ class HuggingFaceCausalLM:
         return dtype_map[self._model_config.dtype]
 
 
+# ── vLLM implementation ──────────────────────────────────────────────
+
+
+class VLLMModel:
+    """vLLM adapter for high-throughput inference.
+
+    Model is loaded **lazily** on the first call to :meth:`generate` or :meth:`generate_batch`.
+
+    Args:
+        model_config: Model identification and hardware settings.
+        generation_config: Generation hyper-parameters.
+    """
+
+    def __init__(
+        self,
+        model_config: ModelConfig,
+        generation_config: GenerationConfig,
+    ) -> None:
+        self._model_config = model_config
+        self._gen_config = generation_config
+        self._llm = None
+        self._tokenizer = None
+
+    @property
+    def model_id(self) -> str:
+        return self._model_config.model_id
+
+    def generate(self, prompt: str) -> GenerationResult:
+        """Generate text from a single prompt."""
+        results = self.generate_batch([prompt])
+        return results[0]
+
+    def generate_batch(self, prompts: list[str]) -> list[GenerationResult]:
+        """Generate text from a batch of prompts using vLLM."""
+        if not prompts:
+            return []
+
+        self._ensure_loaded()
+        assert self._llm is not None
+        assert self._tokenizer is not None
+
+        from vllm import SamplingParams
+
+        # Apply chat template if the tokenizer supports it
+        input_texts = []
+        if getattr(self._tokenizer, "chat_template", None):
+            for p in prompts:
+                messages = [{"role": "user", "content": p}]
+                input_texts.append(
+                    self._tokenizer.apply_chat_template(
+                        messages, tokenize=False, add_generation_prompt=True
+                    )
+                )
+        else:
+            input_texts = prompts
+
+        sampling_params = SamplingParams(
+            max_tokens=self._gen_config.max_new_tokens,
+            temperature=self._gen_config.temperature if self._gen_config.do_sample else 0.0,
+        )
+
+        start = time.perf_counter()
+        
+        # vLLM automatically handles batching and returns outputs in the same order
+        outputs = self._llm.generate(input_texts, sampling_params, use_tqdm=False)
+        
+        elapsed = time.perf_counter() - start
+
+        results = []
+        for output in outputs:
+            text = output.outputs[0].text
+            actual_input_tokens = len(output.prompt_token_ids)
+            output_tokens = len(output.outputs[0].token_ids)
+            
+            results.append(
+                GenerationResult(
+                    text=text,
+                    latency_seconds=elapsed,
+                    input_tokens=actual_input_tokens,
+                    output_tokens=output_tokens,
+                )
+            )
+
+        return results
+
+    def _ensure_loaded(self) -> None:
+        """Load the vLLM engine if not already done."""
+        if self._llm is not None:
+            return
+
+        try:
+            from vllm import LLM
+            from transformers import AutoTokenizer
+        except ImportError as e:
+            raise ImportError(
+                "vLLM is required for the vllm provider. "
+                "Install with: pip install vllm"
+            ) from e
+
+        logger.info(
+            "Loading tokenizer: %s (revision: %s)",
+            self._model_config.model_id,
+            self._model_config.revision,
+        )
+        self._tokenizer = AutoTokenizer.from_pretrained(
+            self._model_config.model_id,
+            revision=self._model_config.revision,
+        )
+
+        logger.info(
+            "Loading vLLM model: %s (gpu_memory_utilization: %s)",
+            self._model_config.model_id,
+            self._model_config.gpu_memory_utilization,
+        )
+        
+        self._llm = LLM(
+            model=self._model_config.model_id,
+            revision=self._model_config.revision,
+            gpu_memory_utilization=self._model_config.gpu_memory_utilization,
+            tensor_parallel_size=1,
+            trust_remote_code=True,
+            enforce_eager=True,
+            max_model_len=2048,
+        )
+
+        logger.info("vLLM Model loaded successfully")
+
+
 # ── Factory ─────────────────────────────────────────────────────────
 
 
@@ -234,4 +453,6 @@ def create_model(
     """
     if model_config.provider == "huggingface":
         return HuggingFaceCausalLM(model_config, generation_config)
+    elif model_config.provider == "vllm":
+        return VLLMModel(model_config, generation_config)
     raise ValueError(f"Unsupported model provider: {model_config.provider!r}")

@@ -568,7 +568,10 @@ def _ensure_nltk_resources() -> None:
         # also download omw-1.4 which is often required for wordnet lemmatizer
         nltk.download('omw-1.4', quiet=True)
 
-def _nltk_tokenize_question(question: str) -> set[str]:
+import functools
+
+@functools.lru_cache(maxsize=10000)
+def _nltk_tokenize_question(question: str) -> frozenset[str]:
     """Tokenize and normalize a natural-language question using NLTK."""
     _ensure_nltk_resources()
     
@@ -585,10 +588,11 @@ def _nltk_tokenize_question(question: str) -> set[str]:
             continue
         normalized_tokens.add(lemmatizer.lemmatize(token))
         
-    return normalized_tokens
+    return frozenset(normalized_tokens)
 
 
-def _nltk_tokenize_name(name: str) -> set[str]:
+@functools.lru_cache(maxsize=10000)
+def _nltk_tokenize_name(name: str) -> frozenset[str]:
     """Tokenize and normalize a schema identifier using NLTK.
     
     Handles snake_case, camelCase, and hyphens by substituting them
@@ -614,10 +618,10 @@ def _nltk_tokenize_name(name: str) -> set[str]:
             continue
         normalized.add(lemmatizer.lemmatize(token))
         
-    return normalized
+    return frozenset(normalized)
 
 
-def _nltk_name_matches_tokens(name: str, question_tokens: set[str]) -> bool:
+def _nltk_name_matches_tokens(name: str, question_tokens: frozenset[str]) -> bool:
     """Check whether a schema name has an NLTK normalized overlap with question tokens."""
     name_tokens = _nltk_tokenize_name(name)
     return bool(name_tokens & question_tokens)

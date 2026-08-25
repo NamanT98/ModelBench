@@ -1,0 +1,3928 @@
+{
+  "metadata": {
+    "experiment_name": "spider_qwen_m7_hybrid_score_alpha25",
+    "dataset": "spider",
+    "split": "dev",
+    "limit": 50,
+    "seed": 42,
+    "model_id": "Qwen/Qwen2.5-Coder-3B-Instruct",
+    "model_revision": "main",
+    "schema_strategy": "schema_linking_normalized",
+    "prompting_strategy": "few_shot",
+    "generation_config": {
+      "max_new_tokens": 256,
+      "temperature": 0.0,
+      "do_sample": false
+    }
+  },
+  "total_samples": 50,
+  "valid_sql_count": 39,
+  "exact_match_count": 22,
+  "execution_correct_count": 34,
+  "sql_validity_rate": 0.78,
+  "exact_match_rate": 0.44,
+  "execution_accuracy": 0.68,
+  "avg_latency_seconds": 6.887677624880016,
+  "samples": [
+    {
+      "sample_id": "concert_singer_0",
+      "db_id": "concert_singer",
+      "question": "How many singers do we have?",
+      "gold_sql": "SELECT count(*) FROM singer",
+      "generated_text": "```sql\nSELECT COUNT(*) FROM singer\n```",
+      "extracted_sql": "SELECT COUNT(*) FROM singer",
+      "sql_valid": true,
+      "exact_match": true,
+      "execution_accuracy": true,
+      "execution_error": null,
+      "latency_seconds": 9.693507724001392,
+      "input_tokens": 726,
+      "output_tokens": 97,
+      "schema_diagnostics": {
+        "original_table_count": 4,
+        "selected_table_count": 2,
+        "selected_column_count": 9,
+        "schema_string_length": 292,
+        "schema_reduction_ratio": 0.5714,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 8.338461498002289,
+        "lexical_top_k_ids": [
+          [
+            "customers_and_invoices",
+            "How many accounts are there?"
+          ],
+          [
+            "customers_card_transactions",
+            "How many accounts do we have?"
+          ],
+          [
+            "cre_Docs_and_Epenses",
+            "How many accounts do we have?"
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "theme_gallery",
+            "How many artists do we have?"
+          ],
+          [
+            "music_2",
+            "How many songs have a shared vocal?"
+          ],
+          [
+            "music_2",
+            "How many songs have a lead vocal?"
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "theme_gallery",
+            "How many artists do we have?"
+          ],
+          [
+            "cre_Drama_Workshop_Groups",
+            "How many customers do we have?"
+          ],
+          [
+            "music_2",
+            "How many songs are there?"
+          ]
+        ],
+        "overlap_lex_sem": 0,
+        "fused_scores": [
+          1.0,
+          0.927867998684222,
+          0.9243982938870465
+        ]
+      }
+    },
+    {
+      "sample_id": "concert_singer_1",
+      "db_id": "concert_singer",
+      "question": "What is the total number of singers?",
+      "gold_sql": "SELECT count(*) FROM singer",
+      "generated_text": "```sql\nSELECT COUNT(*) FROM singer\n```",
+      "extracted_sql": "SELECT COUNT(*) FROM singer",
+      "sql_valid": true,
+      "exact_match": true,
+      "execution_accuracy": true,
+      "execution_error": null,
+      "latency_seconds": 9.693507724001392,
+      "input_tokens": 490,
+      "output_tokens": 97,
+      "schema_diagnostics": {
+        "original_table_count": 4,
+        "selected_table_count": 2,
+        "selected_column_count": 9,
+        "schema_string_length": 292,
+        "schema_reduction_ratio": 0.5714,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.09733174899884034,
+        "lexical_top_k_ids": [
+          [
+            "flight_4",
+            "What is the total number of airlines?"
+          ],
+          [
+            "csu_1",
+            "What is the total number of campuses?"
+          ],
+          [
+            "sports_competition",
+            "What is the total number of clubs?"
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "music_2",
+            "How many songs have a lead vocal?"
+          ],
+          [
+            "music_2",
+            "How many songs have a shared vocal?"
+          ],
+          [
+            "music_1",
+            "How many songs, on average, are sung by a female artist?"
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "allergy_1",
+            "What is the total number of students?"
+          ],
+          [
+            "gas_company",
+            "What is the total number of companies?"
+          ],
+          [
+            "flight_4",
+            "What is the total number of airlines?"
+          ]
+        ],
+        "overlap_lex_sem": 0,
+        "fused_scores": [
+          0.8760564926464225,
+          0.8632914083038707,
+          0.8603641151605346
+        ]
+      }
+    },
+    {
+      "sample_id": "concert_singer_2",
+      "db_id": "concert_singer",
+      "question": "Show name, country, age for all singers ordered by age from the oldest to the youngest.",
+      "gold_sql": "SELECT name ,  country ,  age FROM singer ORDER BY age DESC",
+      "generated_text": "```sql\nSELECT Name ,  Country ,  Age FROM singer ORDER BY Age DESC\n```",
+      "extracted_sql": "SELECT Name ,  Country ,  Age FROM singer ORDER BY Age DESC",
+      "sql_valid": true,
+      "exact_match": true,
+      "execution_accuracy": true,
+      "execution_error": null,
+      "latency_seconds": 9.693507724001392,
+      "input_tokens": 584,
+      "output_tokens": 97,
+      "schema_diagnostics": {
+        "original_table_count": 4,
+        "selected_table_count": 4,
+        "selected_column_count": 13,
+        "schema_string_length": 460,
+        "schema_reduction_ratio": 0.381,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.11958896199939772,
+        "lexical_top_k_ids": [
+          [
+            "theme_gallery",
+            "Show all artist name, age, and country ordered by the yeared they joined."
+          ],
+          [
+            "match_season",
+            "Show the country name and capital of all countries."
+          ],
+          [
+            "wedding",
+            "Show the name and country for all people whose age is smaller than the average."
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "music_4",
+            "List the age of all music artists."
+          ],
+          [
+            "theme_gallery",
+            "Show all artist name, age, and country ordered by the yeared they joined."
+          ],
+          [
+            "candidate_poll",
+            "List all people names in the order of their date of birth from old to young."
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "theme_gallery",
+            "Show all artist name, age, and country ordered by the yeared they joined."
+          ],
+          [
+            "wedding",
+            "Show the name and country for all people whose age is smaller than the average."
+          ],
+          [
+            "music_4",
+            "List the age of all music artists."
+          ]
+        ],
+        "overlap_lex_sem": 1,
+        "fused_scores": [
+          0.9970004713399945,
+          0.8823045483115856,
+          0.8
+        ]
+      }
+    },
+    {
+      "sample_id": "concert_singer_3",
+      "db_id": "concert_singer",
+      "question": "What are the names, countries, and ages for every singer in descending order of age?",
+      "gold_sql": "SELECT name ,  country ,  age FROM singer ORDER BY age DESC",
+      "generated_text": "SELECT Name ,  Country ,  Age FROM singer ORDER BY Age DESC",
+      "extracted_sql": "SELECT Name ,  Country ,  Age FROM singer ORDER BY Age DESC",
+      "sql_valid": true,
+      "exact_match": true,
+      "execution_accuracy": true,
+      "execution_error": null,
+      "latency_seconds": 9.693507724001392,
+      "input_tokens": 519,
+      "output_tokens": 97,
+      "schema_diagnostics": {
+        "original_table_count": 4,
+        "selected_table_count": 4,
+        "selected_column_count": 13,
+        "schema_string_length": 460,
+        "schema_reduction_ratio": 0.381,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.07485675700081629,
+        "lexical_top_k_ids": [
+          [
+            "aircraft",
+            "List names of all pilot in descending order of age."
+          ],
+          [
+            "school_bus",
+            "Show the name of drivers in descending order of age."
+          ],
+          [
+            "network_2",
+            "What are the names of everybody sorted by age in descending order?"
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "music_4",
+            "What are the famous titles and ages of each artist, listed in descending order by age?"
+          ],
+          [
+            "music_4",
+            "Please list the age and famous title of artists in descending order of age."
+          ],
+          [
+            "network_2",
+            "What are the names of everybody sorted by age in descending order?"
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "network_2",
+            "What are the names of everybody sorted by age in descending order?"
+          ],
+          [
+            "music_4",
+            "What are the famous titles and ages of each artist, listed in descending order by age?"
+          ],
+          [
+            "music_4",
+            "Please list the age and famous title of artists in descending order of age."
+          ]
+        ],
+        "overlap_lex_sem": 1,
+        "fused_scores": [
+          0.9798470235611374,
+          0.9034090909090909,
+          0.8827535189919925
+        ]
+      }
+    },
+    {
+      "sample_id": "concert_singer_4",
+      "db_id": "concert_singer",
+      "question": "What is the average, minimum, and maximum age of all singers from France?",
+      "gold_sql": "SELECT avg(age) ,  min(age) ,  max(age) FROM singer WHERE country  =  'France'",
+      "generated_text": "```sql\nSELECT avg(age) ,  min(age) ,  max(age) FROM singer WHERE country  =  'France'\n```",
+      "extracted_sql": "SELECT avg(age) ,  min(age) ,  max(age) FROM singer WHERE country  =  'France'",
+      "sql_valid": true,
+      "exact_match": true,
+      "execution_accuracy": true,
+      "execution_error": null,
+      "latency_seconds": 9.693507724001392,
+      "input_tokens": 482,
+      "output_tokens": 97,
+      "schema_diagnostics": {
+        "original_table_count": 4,
+        "selected_table_count": 3,
+        "selected_column_count": 11,
+        "schema_string_length": 357,
+        "schema_reduction_ratio": 0.4762,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.07626209299996844,
+        "lexical_top_k_ids": [
+          [
+            "allergy_1",
+            "Show the minimum, average, and maximum age of all students."
+          ],
+          [
+            "wedding",
+            "Show the minimum, maximum, and average age for all people."
+          ],
+          [
+            "game_1",
+            "Show the average, minimum, and maximum age for different majors."
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "music_4",
+            "What is the average age of all artists?"
+          ],
+          [
+            "music_4",
+            "What are the ages of all music artists?"
+          ],
+          [
+            "theme_gallery",
+            "What is the average and minimum age of all artists from United States."
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "theme_gallery",
+            "What is the average and minimum age of all artists from United States."
+          ],
+          [
+            "music_4",
+            "What is the average age of all artists?"
+          ],
+          [
+            "wedding",
+            "Show the minimum, maximum, and average age for all people."
+          ]
+        ],
+        "overlap_lex_sem": 0,
+        "fused_scores": [
+          0.9016522326390309,
+          0.8928571428571428,
+          0.8447622827984647
+        ]
+      }
+    },
+    {
+      "sample_id": "concert_singer_5",
+      "db_id": "concert_singer",
+      "question": "What is the average, minimum, and maximum age for all French singers?",
+      "gold_sql": "SELECT avg(age) ,  min(age) ,  max(age) FROM singer WHERE country  =  'France'",
+      "generated_text": "```sql\nSELECT avg(Age) ,  min(Age) ,  max(Age) FROM singer WHERE Country  =  'France'\n```",
+      "extracted_sql": "SELECT avg(Age) ,  min(Age) ,  max(Age) FROM singer WHERE Country  =  'France'",
+      "sql_valid": true,
+      "exact_match": true,
+      "execution_accuracy": true,
+      "execution_error": null,
+      "latency_seconds": 9.693507724001392,
+      "input_tokens": 481,
+      "output_tokens": 97,
+      "schema_diagnostics": {
+        "original_table_count": 4,
+        "selected_table_count": 3,
+        "selected_column_count": 11,
+        "schema_string_length": 357,
+        "schema_reduction_ratio": 0.4762,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.06478338099987013,
+        "lexical_top_k_ids": [
+          [
+            "allergy_1",
+            "Show the minimum, average, and maximum age of all students."
+          ],
+          [
+            "wedding",
+            "Show the minimum, maximum, and average age for all people."
+          ],
+          [
+            "game_1",
+            "Show the average, minimum, and maximum age for different majors."
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "music_4",
+            "What is the average age of all artists?"
+          ],
+          [
+            "music_4",
+            "What are the ages of all music artists?"
+          ],
+          [
+            "theme_gallery",
+            "What is the average and minimum age of all artists from United States."
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "theme_gallery",
+            "What is the average and minimum age of all artists from United States."
+          ],
+          [
+            "music_4",
+            "What is the average age of all artists?"
+          ],
+          [
+            "wedding",
+            "Show the minimum, maximum, and average age for all people."
+          ]
+        ],
+        "overlap_lex_sem": 0,
+        "fused_scores": [
+          0.8957927164378935,
+          0.8928571428571428,
+          0.8675708350194105
+        ]
+      }
+    },
+    {
+      "sample_id": "concert_singer_6",
+      "db_id": "concert_singer",
+      "question": "Show the name and the release year of the song by the youngest singer.",
+      "gold_sql": "SELECT song_name ,  song_release_year FROM singer ORDER BY age LIMIT 1",
+      "generated_text": "```sql\nSELECT T2.Name ,  T2.Song_release_year FROM singer AS T1 JOIN singer_in_concert AS T3 ON T1.Singer_ID  =  T3.Singer_ID JOIN concert AS T4 ON T3.concert_ID  =  T4.concert_ID JOIN songs AS T2 ON T2.Song_Name  =  T1.Song_Name ORDER BY T1.Age DESC LIMIT 1\n```",
+      "extracted_sql": "SELECT T2.Name ,  T2.Song_release_year FROM singer AS T1 JOIN singer_in_concert AS T3 ON T1.Singer_ID  =  T3.Singer_ID JOIN concert AS T4 ON T3.concert_ID  =  T4.concert_ID JOIN songs AS T2 ON T2.Song_Name  =  T1.Song_Name ORDER BY T1.Age DESC LIMIT 1",
+      "sql_valid": false,
+      "exact_match": false,
+      "execution_accuracy": false,
+      "execution_error": "no such table: songs",
+      "latency_seconds": 9.693507724001392,
+      "input_tokens": 940,
+      "output_tokens": 97,
+      "schema_diagnostics": {
+        "original_table_count": 4,
+        "selected_table_count": 4,
+        "selected_column_count": 14,
+        "schema_string_length": 474,
+        "schema_reduction_ratio": 0.3333,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.07743233599831001,
+        "lexical_top_k_ids": [
+          [
+            "music_1",
+            "What is the name of the song that was released in the most recent year?"
+          ],
+          [
+            "cinema",
+            "Show name, opening year, and capacity for each cinema."
+          ],
+          [
+            "music_1",
+            "What are the names of all singers that are from the UK and released a song in English?"
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "music_1",
+            "What is the name of the song that was released in the most recent year?"
+          ],
+          [
+            "music_1",
+            "What is the name of the song that was released most recently?"
+          ],
+          [
+            "music_2",
+            "Who performed the song named \"Badlands\"? Show the first name and the last name."
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "music_1",
+            "What is the name of the song that was released in the most recent year?"
+          ],
+          [
+            "music_1",
+            "What is the name of the song that was released most recently?"
+          ],
+          [
+            "music_2",
+            "Who performed the song named \"Badlands\"? Show the first name and the last name."
+          ]
+        ],
+        "overlap_lex_sem": 1,
+        "fused_scores": [
+          1.0,
+          0.8972637250361357,
+          0.8969038185413584
+        ]
+      }
+    },
+    {
+      "sample_id": "concert_singer_7",
+      "db_id": "concert_singer",
+      "question": "What are the names and release years for all the songs of the youngest singer?",
+      "gold_sql": "SELECT song_name ,  song_release_year FROM singer ORDER BY age LIMIT 1",
+      "generated_text": "```sql\nSELECT T2.Name, T2.Song_release_year FROM singer AS T1 JOIN singer_in_concert AS T3 ON T1.Singer_ID  =  T3.Singer_ID JOIN concert AS T4 ON T3.concert_ID  =  T4.concert_ID JOIN song AS T2 ON T1.Singer_ID  =  T2.Singer_ID WHERE T1.Age  =  (SELECT MIN(Age) FROM singer)\n```",
+      "extracted_sql": "SELECT T2.Name, T2.Song_release_year FROM singer AS T1 JOIN singer_in_concert AS T3 ON T1.Singer_ID  =  T3.Singer_ID JOIN concert AS T4 ON T3.concert_ID  =  T4.concert_ID JOIN song AS T2 ON T1.Singer_ID  =  T2.Singer_ID WHERE T1.Age  =  (SELECT MIN(Age) FROM singer)",
+      "sql_valid": false,
+      "exact_match": false,
+      "execution_accuracy": false,
+      "execution_error": "no such table: song",
+      "latency_seconds": 9.693507724001392,
+      "input_tokens": 891,
+      "output_tokens": 97,
+      "schema_diagnostics": {
+        "original_table_count": 4,
+        "selected_table_count": 4,
+        "selected_column_count": 14,
+        "schema_string_length": 474,
+        "schema_reduction_ratio": 0.3333,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.34066270800030907,
+        "lexical_top_k_ids": [
+          [
+            "music_1",
+            "What is the name of the song that was released in the most recent year?"
+          ],
+          [
+            "music_1",
+            "What are the names of all singers that are from the UK and released a song in English?"
+          ],
+          [
+            "music_1",
+            "Return the names of singers who are from UK and released an English song."
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "music_1",
+            "What is the gender and name of the artist who sang the song with the smallest resolution?"
+          ],
+          [
+            "music_1",
+            "What are the names of the artists who sang the shortest song?"
+          ],
+          [
+            "music_1",
+            "What is the name of the artist who produced the shortest song?"
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "music_1",
+            "What are the names of all singers that are from the UK and released a song in English?"
+          ],
+          [
+            "music_1",
+            "What are the names of the artists who sang the shortest song?"
+          ],
+          [
+            "allergy_1",
+            "What is the last name of the youngest student?"
+          ]
+        ],
+        "overlap_lex_sem": 0,
+        "fused_scores": [
+          0.9377320813292662,
+          0.8965884553693769,
+          0.8922328078755276
+        ]
+      }
+    },
+    {
+      "sample_id": "concert_singer_8",
+      "db_id": "concert_singer",
+      "question": "What are all distinct countries where singers above age 20 are from?",
+      "gold_sql": "SELECT DISTINCT country FROM singer WHERE age  >  20",
+      "generated_text": "```sql\nSELECT DISTINCT Country FROM singer WHERE Age > 20\n```",
+      "extracted_sql": "SELECT DISTINCT Country FROM singer WHERE Age > 20",
+      "sql_valid": true,
+      "exact_match": true,
+      "execution_accuracy": true,
+      "execution_error": null,
+      "latency_seconds": 6.8469547540007625,
+      "input_tokens": 690,
+      "output_tokens": 92,
+      "schema_diagnostics": {
+        "original_table_count": 4,
+        "selected_table_count": 2,
+        "selected_column_count": 9,
+        "schema_string_length": 292,
+        "schema_reduction_ratio": 0.5714,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 1.4119555310026044,
+        "lexical_top_k_ids": [
+          [
+            "theme_gallery",
+            "What are all distinct country for artists?"
+          ],
+          [
+            "climbing",
+            "How many distinct countries are the climbers from?"
+          ],
+          [
+            "railway",
+            "Show the distinct countries of managers."
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "music_1",
+            "What are the names of the singers who sang the top 3 most highly rated songs and what countries do they hail from?"
+          ],
+          [
+            "music_4",
+            "What are the ages of all music artists?"
+          ],
+          [
+            "wedding",
+            "Show the country where people older than 30 and younger than 25 are from."
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "theme_gallery",
+            "What are all distinct country for artists?"
+          ],
+          [
+            "music_1",
+            "What are the names of the singers who sang the top 3 most highly rated songs and what countries do they hail from?"
+          ],
+          [
+            "music_4",
+            "What are the ages of all music artists?"
+          ]
+        ],
+        "overlap_lex_sem": 0,
+        "fused_scores": [
+          0.9301992133172068,
+          0.8653846153846154,
+          0.826010286122952
+        ]
+      }
+    },
+    {
+      "sample_id": "concert_singer_9",
+      "db_id": "concert_singer",
+      "question": "What are  the different countries with singers above age 20?",
+      "gold_sql": "SELECT DISTINCT country FROM singer WHERE age  >  20",
+      "generated_text": "```sql\nSELECT DISTINCT Country FROM singer WHERE Age > 20\n```",
+      "extracted_sql": "SELECT DISTINCT Country FROM singer WHERE Age > 20",
+      "sql_valid": true,
+      "exact_match": true,
+      "execution_accuracy": true,
+      "execution_error": null,
+      "latency_seconds": 6.8469547540007625,
+      "input_tokens": 515,
+      "output_tokens": 92,
+      "schema_diagnostics": {
+        "original_table_count": 4,
+        "selected_table_count": 2,
+        "selected_column_count": 9,
+        "schema_string_length": 292,
+        "schema_reduction_ratio": 0.5714,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.09628168599738274,
+        "lexical_top_k_ids": [
+          [
+            "swimming",
+            "How many different countries are all the swimmers from?"
+          ],
+          [
+            "theme_gallery",
+            "Return the different countries for artists."
+          ],
+          [
+            "climbing",
+            "Count the number of different countries that climbers are from."
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "music_4",
+            "What are the ages of all music artists?"
+          ],
+          [
+            "music_1",
+            "What are the names of the singers who sang the top 3 most highly rated songs and what countries do they hail from?"
+          ],
+          [
+            "music_4",
+            "List the age of all music artists."
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "theme_gallery",
+            "Return the different countries for artists."
+          ],
+          [
+            "music_4",
+            "What are the ages of all music artists?"
+          ],
+          [
+            "musical",
+            "List the name of actors whose age is not 20."
+          ]
+        ],
+        "overlap_lex_sem": 0,
+        "fused_scores": [
+          0.8974603059117354,
+          0.875,
+          0.8714774052970049
+        ]
+      }
+    },
+    {
+      "sample_id": "concert_singer_10",
+      "db_id": "concert_singer",
+      "question": "Show all countries and the number of singers in each country.",
+      "gold_sql": "SELECT country ,  count(*) FROM singer GROUP BY country",
+      "generated_text": "```sql\nSELECT Country ,  COUNT(*) FROM singer GROUP BY Country\n```",
+      "extracted_sql": "SELECT Country ,  COUNT(*) FROM singer GROUP BY Country",
+      "sql_valid": true,
+      "exact_match": true,
+      "execution_accuracy": true,
+      "execution_error": null,
+      "latency_seconds": 6.8469547540007625,
+      "input_tokens": 553,
+      "output_tokens": 92,
+      "schema_diagnostics": {
+        "original_table_count": 4,
+        "selected_table_count": 2,
+        "selected_column_count": 9,
+        "schema_string_length": 292,
+        "schema_reduction_ratio": 0.5714,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.08704624999882071,
+        "lexical_top_k_ids": [
+          [
+            "wedding",
+            "Show all countries and the number of people from each country."
+          ],
+          [
+            "climbing",
+            "Please show the countries and the number of climbers from each country."
+          ],
+          [
+            "decoration_competition",
+            "Show the different countries and the number of members from each."
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "wedding",
+            "Show all countries and the number of people from each country."
+          ],
+          [
+            "decoration_competition",
+            "Show the different countries and the number of members from each."
+          ],
+          [
+            "match_season",
+            "Show the country name and capital of all countries."
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "wedding",
+            "Show all countries and the number of people from each country."
+          ],
+          [
+            "decoration_competition",
+            "Show the different countries and the number of members from each."
+          ],
+          [
+            "match_season",
+            "Show the country names and the corresponding number of players."
+          ]
+        ],
+        "overlap_lex_sem": 2,
+        "fused_scores": [
+          1.0,
+          0.91327226528446,
+          0.8249731763598829
+        ]
+      }
+    },
+    {
+      "sample_id": "concert_singer_11",
+      "db_id": "concert_singer",
+      "question": "How many singers are from each country?",
+      "gold_sql": "SELECT country ,  count(*) FROM singer GROUP BY country",
+      "generated_text": "```sql\nSELECT Country ,  COUNT(*) FROM singer GROUP BY Country\n```",
+      "extracted_sql": "SELECT Country ,  COUNT(*) FROM singer GROUP BY Country",
+      "sql_valid": true,
+      "exact_match": true,
+      "execution_accuracy": true,
+      "execution_error": null,
+      "latency_seconds": 6.8469547540007625,
+      "input_tokens": 551,
+      "output_tokens": 92,
+      "schema_diagnostics": {
+        "original_table_count": 4,
+        "selected_table_count": 2,
+        "selected_column_count": 9,
+        "schema_string_length": 292,
+        "schema_reduction_ratio": 0.5714,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.0869053280002845,
+        "lexical_top_k_ids": [
+          [
+            "climbing",
+            "How many climbers are from each country?"
+          ],
+          [
+            "match_season",
+            "How many countries are there in total?"
+          ],
+          [
+            "match_season",
+            "How many players are from each country?"
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "match_season",
+            "How many players are from each country?"
+          ],
+          [
+            "music_2",
+            "How many songs have a lead vocal?"
+          ],
+          [
+            "music_2",
+            "How many songs have a shared vocal?"
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "match_season",
+            "How many players are from each country?"
+          ],
+          [
+            "match_season",
+            "How many countries are there in total?"
+          ],
+          [
+            "climbing",
+            "How many climbers are from each country?"
+          ]
+        ],
+        "overlap_lex_sem": 1,
+        "fused_scores": [
+          1.0,
+          0.9650662713938537,
+          0.9145557489787828
+        ]
+      }
+    },
+    {
+      "sample_id": "concert_singer_12",
+      "db_id": "concert_singer",
+      "question": "List all song names by singers above the average age.",
+      "gold_sql": "SELECT song_name FROM singer WHERE age  >  (SELECT avg(age) FROM singer)",
+      "generated_text": "```sql\nSELECT T2.Song_Name FROM singer AS T1 JOIN singer_in_concert AS T3 ON T1.Singer_ID  =  T3.Singer_ID JOIN concert AS T4 ON T3.concert_ID  =  T4.concert_ID JOIN stadium AS T5 ON T4.Stadium_ID  =  T5.Stadium_ID WHERE T1.Age  >  (SELECT AVG(Age) FROM singer)\n```",
+      "extracted_sql": "SELECT T2.Song_Name FROM singer AS T1 JOIN singer_in_concert AS T3 ON T1.Singer_ID  =  T3.Singer_ID JOIN concert AS T4 ON T3.concert_ID  =  T4.concert_ID JOIN stadium AS T5 ON T4.Stadium_ID  =  T5.Stadium_ID WHERE T1.Age  >  (SELECT AVG(Age) FROM singer)",
+      "sql_valid": false,
+      "exact_match": false,
+      "execution_accuracy": false,
+      "execution_error": "no such column: T2.Song_Name",
+      "latency_seconds": 6.8469547540007625,
+      "input_tokens": 743,
+      "output_tokens": 92,
+      "schema_diagnostics": {
+        "original_table_count": 4,
+        "selected_table_count": 4,
+        "selected_column_count": 14,
+        "schema_string_length": 476,
+        "schema_reduction_ratio": 0.3333,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.09157582899933914,
+        "lexical_top_k_ids": [
+          [
+            "dorm_1",
+            "What is the average age for each dorm and what are the names of each dorm?"
+          ],
+          [
+            "music_1",
+            "List the name and country of origin for all singers who have produced songs with rating above 9."
+          ],
+          [
+            "music_1",
+            "Give me a list of the names of all songs ordered by their resolution."
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "music_4",
+            "List the age of all music artists."
+          ],
+          [
+            "music_4",
+            "Return the average age across all artists."
+          ],
+          [
+            "music_4",
+            "Return names of songs in volumes that are by artists that are at least 32 years old."
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "music_4",
+            "List the age of all music artists."
+          ],
+          [
+            "music_4",
+            "Return the average age across all artists."
+          ],
+          [
+            "music_1",
+            "List the name and country of origin for all singers who have produced songs with rating above 9."
+          ]
+        ],
+        "overlap_lex_sem": 0,
+        "fused_scores": [
+          0.8958333333333334,
+          0.8167312469241693,
+          0.8156167037890536
+        ]
+      }
+    },
+    {
+      "sample_id": "concert_singer_13",
+      "db_id": "concert_singer",
+      "question": "What are all the song names by singers who are older than average?",
+      "gold_sql": "SELECT song_name FROM singer WHERE age  >  (SELECT avg(age) FROM singer)",
+      "generated_text": "```sql\nSELECT T2.song_name FROM singer AS T1 JOIN singer_in_concert AS T2 ON T1.Singer_ID  =  T2.Singer_ID WHERE T1.Age  >  (SELECT AVG(Age) FROM singer)\n```",
+      "extracted_sql": "SELECT T2.song_name FROM singer AS T1 JOIN singer_in_concert AS T2 ON T1.Singer_ID  =  T2.Singer_ID WHERE T1.Age  >  (SELECT AVG(Age) FROM singer)",
+      "sql_valid": false,
+      "exact_match": false,
+      "execution_accuracy": false,
+      "execution_error": "no such column: T2.song_name",
+      "latency_seconds": 6.8469547540007625,
+      "input_tokens": 904,
+      "output_tokens": 92,
+      "schema_diagnostics": {
+        "original_table_count": 4,
+        "selected_table_count": 4,
+        "selected_column_count": 14,
+        "schema_string_length": 476,
+        "schema_reduction_ratio": 0.3333,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.08046932999786804,
+        "lexical_top_k_ids": [
+          [
+            "music_1",
+            "What are the names of all singers that are from the UK and released a song in English?"
+          ],
+          [
+            "music_1",
+            "Return the names of singers who are from UK and released an English song."
+          ],
+          [
+            "music_1",
+            "What are the names of all songs in English?"
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "music_4",
+            "Return names of songs in volumes that are by artists that are at least 32 years old."
+          ],
+          [
+            "music_4",
+            "What are the ages of all music artists?"
+          ],
+          [
+            "music_4",
+            "What are the songs in volumes associated with the artist aged 32 or older?"
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "music_1",
+            "What are the names of all singers that are from the UK and released a song in English?"
+          ],
+          [
+            "network_2",
+            "Whare the names, friends, and ages of all people who are older than the average age of a person?"
+          ],
+          [
+            "music_2",
+            "What is the last name of the artist who sang the most songs?"
+          ]
+        ],
+        "overlap_lex_sem": 0,
+        "fused_scores": [
+          0.9091548788924543,
+          0.8933854720720641,
+          0.8697301987310156
+        ]
+      }
+    },
+    {
+      "sample_id": "concert_singer_14",
+      "db_id": "concert_singer",
+      "question": "Show location and name for all stadiums with a capacity between 5000 and 10000.",
+      "gold_sql": "SELECT LOCATION ,  name FROM stadium WHERE capacity BETWEEN 5000 AND 10000",
+      "generated_text": "```sql\nSELECT LOCATION ,  Name FROM stadium WHERE Capacity BETWEEN 5000 AND 10000\n```",
+      "extracted_sql": "SELECT LOCATION ,  Name FROM stadium WHERE Capacity BETWEEN 5000 AND 10000",
+      "sql_valid": true,
+      "exact_match": true,
+      "execution_accuracy": true,
+      "execution_error": null,
+      "latency_seconds": 6.8469547540007625,
+      "input_tokens": 624,
+      "output_tokens": 92,
+      "schema_diagnostics": {
+        "original_table_count": 4,
+        "selected_table_count": 3,
+        "selected_column_count": 13,
+        "schema_string_length": 366,
+        "schema_reduction_ratio": 0.381,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 8.567733751999185,
+        "lexical_top_k_ids": [
+          [
+            "cinema",
+            "Show the cinema name and location for cinemas with capacity above average."
+          ],
+          [
+            "cre_Theme_park",
+            "Show all distinct location names."
+          ],
+          [
+            "race_track",
+            "Show the name and location for all tracks."
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "swimming",
+            "Find the name of the stadium that has the maximum capacity."
+          ],
+          [
+            "swimming",
+            "How many stadiums are there?"
+          ],
+          [
+            "swimming",
+            "Find the country that has the most stadiums."
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "swimming",
+            "Find the name of the stadium that has the maximum capacity."
+          ],
+          [
+            "swimming",
+            "Find the names of stadiums whose capacity is smaller than the average capacity."
+          ],
+          [
+            "train_station",
+            "Show the name, location, and number of platforms for all stations."
+          ]
+        ],
+        "overlap_lex_sem": 0,
+        "fused_scores": [
+          0.9375,
+          0.8750639827906225,
+          0.8654237893413759
+        ]
+      }
+    },
+    {
+      "sample_id": "concert_singer_15",
+      "db_id": "concert_singer",
+      "question": "What are the locations and names of all stations with capacity between 5000 and 10000?",
+      "gold_sql": "SELECT LOCATION ,  name FROM stadium WHERE capacity BETWEEN 5000 AND 10000",
+      "generated_text": "SELECT LOCATION ,  Name FROM stadium WHERE Capacity BETWEEN 5000 AND 10000",
+      "extracted_sql": "SELECT LOCATION ,  Name FROM stadium WHERE Capacity BETWEEN 5000 AND 10000",
+      "sql_valid": true,
+      "exact_match": true,
+      "execution_accuracy": true,
+      "execution_error": null,
+      "latency_seconds": 6.8469547540007625,
+      "input_tokens": 644,
+      "output_tokens": 92,
+      "schema_diagnostics": {
+        "original_table_count": 4,
+        "selected_table_count": 3,
+        "selected_column_count": 9,
+        "schema_string_length": 264,
+        "schema_reduction_ratio": 0.5714,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.17423548399892752,
+        "lexical_top_k_ids": [
+          [
+            "cinema",
+            "What are the name and location of the cinema with the largest capacity?"
+          ],
+          [
+            "cinema",
+            "Show the cinema name and location for cinemas with capacity above average."
+          ],
+          [
+            "train_station",
+            "Show the name, location, and number of platforms for all stations."
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "bike_1",
+            "What is the number of distinct cities the stations are located at?"
+          ],
+          [
+            "bike_1",
+            "How many different cities have these stations?"
+          ],
+          [
+            "station_weather",
+            "How many different services are provided by all stations?"
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "train_station",
+            "Show the name, location, and number of platforms for all stations."
+          ],
+          [
+            "train_station",
+            "What are all locations of train stations?"
+          ],
+          [
+            "bike_1",
+            "What are the names of stations that have latitude lower than 37.5?"
+          ]
+        ],
+        "overlap_lex_sem": 0,
+        "fused_scores": [
+          0.8831659312119517,
+          0.8791718131273625,
+          0.8214046579368147
+        ]
+      }
+    },
+    {
+      "sample_id": "concert_singer_16",
+      "db_id": "concert_singer",
+      "question": "What is the average and the maximum capacity of all stadiums?",
+      "gold_sql": "SELECT avg(capacity) ,  max(capacity) FROM stadium",
+      "generated_text": "```sql\nSELECT avg(capacity) ,  max(capacity) FROM stadium\n```",
+      "extracted_sql": "SELECT avg(capacity) ,  max(capacity) FROM stadium",
+      "sql_valid": true,
+      "exact_match": true,
+      "execution_accuracy": true,
+      "execution_error": null,
+      "latency_seconds": 4.792641860000003,
+      "input_tokens": 587,
+      "output_tokens": 55,
+      "schema_diagnostics": {
+        "original_table_count": 4,
+        "selected_table_count": 2,
+        "selected_column_count": 9,
+        "schema_string_length": 264,
+        "schema_reduction_ratio": 0.5714,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.11649833899718942,
+        "lexical_top_k_ids": [
+          [
+            "swimming",
+            "Find the name of the stadium that has the maximum capacity."
+          ],
+          [
+            "swimming",
+            "What is the average capacity of the stadiums that were opened in year 2005?"
+          ],
+          [
+            "college_2",
+            "Find the maximum and average capacity among rooms in each building."
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "game_injury",
+            "What are the maximum, minimum and average home games each stadium held?"
+          ],
+          [
+            "swimming",
+            "What is the average capacity of the stadiums that were opened in year 2005?"
+          ],
+          [
+            "swimming",
+            "How many stadiums are there?"
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "swimming",
+            "Find the name of the stadium that has the maximum capacity."
+          ],
+          [
+            "swimming",
+            "What is the average capacity of the stadiums that were opened in year 2005?"
+          ],
+          [
+            "game_injury",
+            "What are the maximum, minimum and average home games each stadium held?"
+          ]
+        ],
+        "overlap_lex_sem": 1,
+        "fused_scores": [
+          0.9702326036176381,
+          0.94911901289686,
+          0.9375
+        ]
+      }
+    },
+    {
+      "sample_id": "concert_singer_17",
+      "db_id": "concert_singer",
+      "question": "What is the average and maximum capacities for all stations?",
+      "gold_sql": "SELECT avg(capacity) ,  max(capacity) FROM stadium",
+      "generated_text": "```sql\nSELECT avg(Capacity) ,  max(Capacity) FROM stadium\n```",
+      "extracted_sql": "SELECT avg(Capacity) ,  max(Capacity) FROM stadium",
+      "sql_valid": true,
+      "exact_match": true,
+      "execution_accuracy": true,
+      "execution_error": null,
+      "latency_seconds": 4.792641860000003,
+      "input_tokens": 613,
+      "output_tokens": 55,
+      "schema_diagnostics": {
+        "original_table_count": 4,
+        "selected_table_count": 1,
+        "selected_column_count": 3,
+        "schema_string_length": 97,
+        "schema_reduction_ratio": 0.8571,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.07997891600098228,
+        "lexical_top_k_ids": [
+          [
+            "college_2",
+            "Find the maximum and average capacity among rooms in each building."
+          ],
+          [
+            "station_weather",
+            "Give me the maximum low temperature and average precipitation at the Amersham station."
+          ],
+          [
+            "mountain_photos",
+            "What are the maximum and average height of the mountains?"
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "station_weather",
+            "How many different services are provided by all stations?"
+          ],
+          [
+            "bike_1",
+            "What is the average latitude and longitude of all starting stations for the trips?"
+          ],
+          [
+            "college_2",
+            "What are the greatest and average capacity for rooms in each building?"
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "college_2",
+            "Find the maximum and average capacity among rooms in each building."
+          ],
+          [
+            "news_report",
+            "what are the average and maximum attendances of all events?"
+          ],
+          [
+            "college_2",
+            "What are the greatest and average capacity for rooms in each building?"
+          ]
+        ],
+        "overlap_lex_sem": 0,
+        "fused_scores": [
+          0.9193059736464643,
+          0.895352435618198,
+          0.8747762496860964
+        ]
+      }
+    },
+    {
+      "sample_id": "concert_singer_18",
+      "db_id": "concert_singer",
+      "question": "What is the name and capacity for the stadium with highest average attendance?",
+      "gold_sql": "SELECT name ,  capacity FROM stadium ORDER BY average DESC LIMIT 1",
+      "generated_text": "```sql\nSELECT name ,  capacity FROM stadium ORDER BY average DESC LIMIT 1\n```",
+      "extracted_sql": "SELECT name ,  capacity FROM stadium ORDER BY average DESC LIMIT 1",
+      "sql_valid": true,
+      "exact_match": true,
+      "execution_accuracy": true,
+      "execution_error": null,
+      "latency_seconds": 4.792641860000003,
+      "input_tokens": 665,
+      "output_tokens": 55,
+      "schema_diagnostics": {
+        "original_table_count": 4,
+        "selected_table_count": 3,
+        "selected_column_count": 13,
+        "schema_string_length": 366,
+        "schema_reduction_ratio": 0.381,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.1165794279986585,
+        "lexical_top_k_ids": [
+          [
+            "swimming",
+            "Find the names of stadiums whose capacity is smaller than the average capacity."
+          ],
+          [
+            "game_injury",
+            "What is the average attendance of stadiums with capacity percentage higher than 100%?"
+          ],
+          [
+            "game_injury",
+            "Show the name, average attendance, total attendance for stadiums where no accidents happened."
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "game_injury",
+            "What is the average attendance of stadiums with capacity percentage higher than 100%?"
+          ],
+          [
+            "swimming",
+            "Find the name of the stadium that has the maximum capacity."
+          ],
+          [
+            "swimming",
+            "What is the name of the stadium which held the most events?"
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "game_injury",
+            "What is the average attendance of stadiums with capacity percentage higher than 100%?"
+          ],
+          [
+            "swimming",
+            "Find the name of the stadium that has the maximum capacity."
+          ],
+          [
+            "game_injury",
+            "Show the name, average attendance, total attendance for stadiums where no accidents happened."
+          ]
+        ],
+        "overlap_lex_sem": 1,
+        "fused_scores": [
+          1.0,
+          0.9387227321930728,
+          0.8642278624460931
+        ]
+      }
+    },
+    {
+      "sample_id": "concert_singer_19",
+      "db_id": "concert_singer",
+      "question": "What is the name and capacity for the stadium with the highest average attendance?",
+      "gold_sql": "SELECT name ,  capacity FROM stadium ORDER BY average DESC LIMIT 1",
+      "generated_text": "```sql\nSELECT T2.name, T2.capacity FROM concert AS T1 INNER JOIN stadium AS T2 ON T1.Stadium_ID = T2.Stadium_ID ORDER BY T2.average DESC LIMIT 1\n```",
+      "extracted_sql": "SELECT T2.name, T2.capacity FROM concert AS T1 INNER JOIN stadium AS T2 ON T1.Stadium_ID = T2.Stadium_ID ORDER BY T2.average DESC LIMIT 1",
+      "sql_valid": true,
+      "exact_match": false,
+      "execution_accuracy": true,
+      "execution_error": null,
+      "latency_seconds": 4.792641860000003,
+      "input_tokens": 562,
+      "output_tokens": 55,
+      "schema_diagnostics": {
+        "original_table_count": 4,
+        "selected_table_count": 3,
+        "selected_column_count": 13,
+        "schema_string_length": 366,
+        "schema_reduction_ratio": 0.381,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.06787556899871561,
+        "lexical_top_k_ids": [
+          [
+            "swimming",
+            "Find the names of stadiums whose capacity is smaller than the average capacity."
+          ],
+          [
+            "game_injury",
+            "What is the average attendance of stadiums with capacity percentage higher than 100%?"
+          ],
+          [
+            "game_injury",
+            "Show the name, average attendance, total attendance for stadiums where no accidents happened."
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "game_injury",
+            "What is the average attendance of stadiums with capacity percentage higher than 100%?"
+          ],
+          [
+            "swimming",
+            "Find the name of the stadium that has the maximum capacity."
+          ],
+          [
+            "swimming",
+            "What is the name of the stadium which held the most events?"
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "game_injury",
+            "What is the average attendance of stadiums with capacity percentage higher than 100%?"
+          ],
+          [
+            "swimming",
+            "Find the name of the stadium that has the maximum capacity."
+          ],
+          [
+            "swimming",
+            "What is the average capacity of the stadiums that were opened in year 2005?"
+          ]
+        ],
+        "overlap_lex_sem": 1,
+        "fused_scores": [
+          1.0,
+          0.9377000849242926,
+          0.8640842742997072
+        ]
+      }
+    },
+    {
+      "sample_id": "concert_singer_20",
+      "db_id": "concert_singer",
+      "question": "How many concerts are there in year 2014 or 2015?",
+      "gold_sql": "SELECT count(*) FROM concert WHERE YEAR  =  2014 OR YEAR  =  2015",
+      "generated_text": "```sql\nSELECT COUNT(*) FROM concert WHERE YEAR IN (2014, 2015)\n```",
+      "extracted_sql": "SELECT COUNT(*) FROM concert WHERE YEAR IN (2014, 2015)",
+      "sql_valid": true,
+      "exact_match": false,
+      "execution_accuracy": true,
+      "execution_error": null,
+      "latency_seconds": 4.792641860000003,
+      "input_tokens": 516,
+      "output_tokens": 55,
+      "schema_diagnostics": {
+        "original_table_count": 4,
+        "selected_table_count": 3,
+        "selected_column_count": 9,
+        "schema_string_length": 367,
+        "schema_reduction_ratio": 0.5714,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.06718796900167945,
+        "lexical_top_k_ids": [
+          [
+            "theme_gallery",
+            "How many exhibition are there in year 2005 or after?"
+          ],
+          [
+            "wedding",
+            "How many weddings are there in year 2016?"
+          ],
+          [
+            "school_finance",
+            "How many budgets are above 3000 in year 2001 or before?"
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "performance_attendance",
+            "How many performances are there?"
+          ],
+          [
+            "swimming",
+            "How many events are there?"
+          ],
+          [
+            "performance_attendance",
+            "What are the dates and locations of performances?"
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "theme_gallery",
+            "How many exhibition are there in year 2005 or after?"
+          ],
+          [
+            "performance_attendance",
+            "How many performances are there?"
+          ],
+          [
+            "swimming",
+            "How many events are there?"
+          ]
+        ],
+        "overlap_lex_sem": 0,
+        "fused_scores": [
+          0.9127451603684374,
+          0.8958333333333334,
+          0.8856846779874653
+        ]
+      }
+    },
+    {
+      "sample_id": "concert_singer_21",
+      "db_id": "concert_singer",
+      "question": "How many concerts occurred in 2014 or 2015?",
+      "gold_sql": "SELECT count(*) FROM concert WHERE YEAR  =  2014 OR YEAR  =  2015",
+      "generated_text": "```sql\nSELECT COUNT(*) FROM concert WHERE YEAR IN ('2014', '2015')\n```",
+      "extracted_sql": "SELECT COUNT(*) FROM concert WHERE YEAR IN ('2014', '2015')",
+      "sql_valid": true,
+      "exact_match": false,
+      "execution_accuracy": true,
+      "execution_error": null,
+      "latency_seconds": 4.792641860000003,
+      "input_tokens": 523,
+      "output_tokens": 55,
+      "schema_diagnostics": {
+        "original_table_count": 4,
+        "selected_table_count": 2,
+        "selected_column_count": 7,
+        "schema_string_length": 261,
+        "schema_reduction_ratio": 0.6667,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.07549065200146288,
+        "lexical_top_k_ids": [
+          [
+            "customers_and_invoices",
+            "How many accounts are there?"
+          ],
+          [
+            "customers_card_transactions",
+            "How many accounts do we have?"
+          ],
+          [
+            "cre_Docs_and_Epenses",
+            "How many accounts do we have?"
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "performance_attendance",
+            "What is the date of the performance with the highest number of attendees?"
+          ],
+          [
+            "swimming",
+            "How many events are there?"
+          ],
+          [
+            "performance_attendance",
+            "How many performances are there?"
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "swimming",
+            "How many events are there?"
+          ],
+          [
+            "performance_attendance",
+            "How many performances are there?"
+          ],
+          [
+            "music_2",
+            "How many songs are there?"
+          ]
+        ],
+        "overlap_lex_sem": 0,
+        "fused_scores": [
+          0.9960422216164602,
+          0.9952571220881575,
+          0.9256311482857731
+        ]
+      }
+    },
+    {
+      "sample_id": "concert_singer_22",
+      "db_id": "concert_singer",
+      "question": "Show the stadium name and the number of concerts in each stadium.",
+      "gold_sql": "SELECT T2.name ,  count(*) FROM concert AS T1 JOIN stadium AS T2 ON T1.stadium_id  =  T2.stadium_id GROUP BY T1.stadium_id",
+      "generated_text": "```sql\nSELECT T2.Name ,  COUNT(*) FROM singer_in_concert AS T1 JOIN concert AS T2 ON T1.concert_id  =  T2.concert_id GROUP BY T1.concert_id\n```",
+      "extracted_sql": "SELECT T2.Name ,  COUNT(*) FROM singer_in_concert AS T1 JOIN concert AS T2 ON T1.concert_id  =  T2.concert_id GROUP BY T1.concert_id",
+      "sql_valid": false,
+      "exact_match": false,
+      "execution_accuracy": false,
+      "execution_error": "no such column: T2.Name",
+      "latency_seconds": 4.792641860000003,
+      "input_tokens": 891,
+      "output_tokens": 55,
+      "schema_diagnostics": {
+        "original_table_count": 4,
+        "selected_table_count": 4,
+        "selected_column_count": 17,
+        "schema_string_length": 553,
+        "schema_reduction_ratio": 0.1905,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.06741412499832222,
+        "lexical_top_k_ids": [
+          [
+            "protein_institute",
+            "For each building, show the name of the building and the number of institutions in it."
+          ],
+          [
+            "flight_1",
+            "Show aircraft names and number of flights for each aircraft."
+          ],
+          [
+            "theme_gallery",
+            "Show all artist names and the number of exhibitions for each artist."
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "performance_attendance",
+            "Show different locations and the number of performances at each location."
+          ],
+          [
+            "performance_attendance",
+            "Show the names of members and the location of the performances they attended."
+          ],
+          [
+            "train_station",
+            "Show the station name and number of trains in each station."
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "train_station",
+            "Show the station name and number of trains in each station."
+          ],
+          [
+            "race_track",
+            "Show the name of track and the number of races in each track."
+          ],
+          [
+            "solvency_ii",
+            "Show the names of products and the number of events they are in."
+          ]
+        ],
+        "overlap_lex_sem": 0,
+        "fused_scores": [
+          0.9404469164505799,
+          0.9352742814575782,
+          0.9200839663503841
+        ]
+      }
+    },
+    {
+      "sample_id": "concert_singer_23",
+      "db_id": "concert_singer",
+      "question": "For each stadium, how many concerts play there?",
+      "gold_sql": "SELECT T2.name ,  count(*) FROM concert AS T1 JOIN stadium AS T2 ON T1.stadium_id  =  T2.stadium_id GROUP BY T1.stadium_id",
+      "generated_text": "```sql\nSELECT T1.Stadium_ID ,  COUNT(T2.concert_ID) \nFROM stadium AS T1 \nJOIN concert AS T2 ON T1.Stadium_ID  =  T2.Stadium_ID \nGROUP BY T1.Stadium_ID\n```",
+      "extracted_sql": "SELECT T1.Stadium_ID ,  COUNT(T2.concert_ID) \nFROM stadium AS T1 \nJOIN concert AS T2 ON T1.Stadium_ID  =  T2.Stadium_ID \nGROUP BY T1.Stadium_ID",
+      "sql_valid": true,
+      "exact_match": false,
+      "execution_accuracy": false,
+      "execution_error": null,
+      "latency_seconds": 4.792641860000003,
+      "input_tokens": 586,
+      "output_tokens": 55,
+      "schema_diagnostics": {
+        "original_table_count": 4,
+        "selected_table_count": 3,
+        "selected_column_count": 14,
+        "schema_string_length": 441,
+        "schema_reduction_ratio": 0.3333,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.3804205149972404,
+        "lexical_top_k_ids": [
+          [
+            "swimming",
+            "How many stadiums are there?"
+          ],
+          [
+            "swimming",
+            "How many stadiums does each country have?"
+          ],
+          [
+            "game_injury",
+            "How many games has each stadium held?"
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "game_injury",
+            "How many games has each stadium held?"
+          ],
+          [
+            "swimming",
+            "How many stadiums are there?"
+          ],
+          [
+            "swimming",
+            "How many stadiums does each country have?"
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "swimming",
+            "How many stadiums are there?"
+          ],
+          [
+            "game_injury",
+            "How many games has each stadium held?"
+          ],
+          [
+            "swimming",
+            "How many stadiums does each country have?"
+          ]
+        ],
+        "overlap_lex_sem": 3,
+        "fused_scores": [
+          0.9919513459610745,
+          0.9166666666666666,
+          0.8487504010895184
+        ]
+      }
+    },
+    {
+      "sample_id": "concert_singer_24",
+      "db_id": "concert_singer",
+      "question": "Show the stadium name and capacity with most number of concerts in year 2014 or after.",
+      "gold_sql": "SELECT T2.name ,  T2.capacity FROM concert AS T1 JOIN stadium AS T2 ON T1.stadium_id  =  T2.stadium_id WHERE T1.year  >=  2014 GROUP BY T2.stadium_id ORDER BY count(*) DESC LIMIT 1",
+      "generated_text": "```sql\nSELECT T2.Name, T2.Capacity\nFROM concert AS T1\nJOIN stadium AS T2 ON T1.Stadium_ID = T2.Stadium_ID\nWHERE YEAR(T1.Year) >= 2014\nGROUP BY T2.Name, T2.Capacity\nORDER BY COUNT(*) DESC\nLIMIT 1;\n```",
+      "extracted_sql": "SELECT T2.Name, T2.Capacity\nFROM concert AS T1\nJOIN stadium AS T2 ON T1.Stadium_ID = T2.Stadium_ID\nWHERE YEAR(T1.Year) >= 2014\nGROUP BY T2.Name, T2.Capacity\nORDER BY COUNT(*) DESC\nLIMIT 1;",
+      "sql_valid": false,
+      "exact_match": false,
+      "execution_accuracy": false,
+      "execution_error": "no such function: YEAR",
+      "latency_seconds": 5.617796088001342,
+      "input_tokens": 723,
+      "output_tokens": 73,
+      "schema_diagnostics": {
+        "original_table_count": 4,
+        "selected_table_count": 4,
+        "selected_column_count": 18,
+        "schema_string_length": 580,
+        "schema_reduction_ratio": 0.1429,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.09724412099967594,
+        "lexical_top_k_ids": [
+          [
+            "cinema",
+            "Show name, opening year, and capacity for each cinema."
+          ],
+          [
+            "wedding",
+            "Show the pair of male and female names in all weddings after year 2014"
+          ],
+          [
+            "company_employee",
+            "Show names of companies and that of employees in descending order of number of years working for that employee."
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "game_injury",
+            "Show the name, average attendance, total attendance for stadiums where no accidents happened."
+          ],
+          [
+            "swimming",
+            "Find the name of the stadium that has the maximum capacity."
+          ],
+          [
+            "performance_attendance",
+            "Show different locations and the number of performances at each location."
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "swimming",
+            "Find the name of the stadium that has the maximum capacity."
+          ],
+          [
+            "cinema",
+            "Show name, opening year, and capacity for each cinema."
+          ],
+          [
+            "game_injury",
+            "Show the name, average attendance, total attendance for stadiums where no accidents happened."
+          ]
+        ],
+        "overlap_lex_sem": 0,
+        "fused_scores": [
+          0.9281607925591898,
+          0.918500098655409,
+          0.8942307692307692
+        ]
+      }
+    },
+    {
+      "sample_id": "concert_singer_25",
+      "db_id": "concert_singer",
+      "question": "What is the name and capacity of the stadium  with the most concerts after 2013?",
+      "gold_sql": "SELECT T2.name ,  T2.capacity FROM concert AS T1 JOIN stadium AS T2 ON T1.stadium_id  =  T2.stadium_id WHERE T1.year  >=  2014 GROUP BY T2.stadium_id ORDER BY count(*) DESC LIMIT 1",
+      "generated_text": "```sql\nSELECT T1.Name, T1.Capacity \nFROM stadium AS T1 \nJOIN concert AS T2 ON T1.Stadium_ID = T2.Stadium_ID \nWHERE T2.Year > 2013 \nGROUP BY T1.Stadium_ID \nORDER BY COUNT(*) DESC \nLIMIT 1;\n```",
+      "extracted_sql": "SELECT T1.Name, T1.Capacity \nFROM stadium AS T1 \nJOIN concert AS T2 ON T1.Stadium_ID = T2.Stadium_ID \nWHERE T2.Year > 2013 \nGROUP BY T1.Stadium_ID \nORDER BY COUNT(*) DESC \nLIMIT 1;",
+      "sql_valid": true,
+      "exact_match": false,
+      "execution_accuracy": true,
+      "execution_error": null,
+      "latency_seconds": 5.617796088001342,
+      "input_tokens": 777,
+      "output_tokens": 73,
+      "schema_diagnostics": {
+        "original_table_count": 4,
+        "selected_table_count": 4,
+        "selected_column_count": 17,
+        "schema_string_length": 553,
+        "schema_reduction_ratio": 0.1905,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.08552223999868147,
+        "lexical_top_k_ids": [
+          [
+            "swimming",
+            "Find the name of the stadium that has the maximum capacity."
+          ],
+          [
+            "swimming",
+            "Find the names of stadiums whose capacity is smaller than the average capacity."
+          ],
+          [
+            "swimming",
+            "Find the names of stadiums that the most swimmers have been to."
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "swimming",
+            "What is the name of the stadium which held the most events?"
+          ],
+          [
+            "swimming",
+            "Find the name of the stadium that has the maximum capacity."
+          ],
+          [
+            "swimming",
+            "Find the name and capacity of the stadium where the event named \"World Junior\" happened."
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "swimming",
+            "Find the name of the stadium that has the maximum capacity."
+          ],
+          [
+            "swimming",
+            "What is the name of the stadium which held the most events?"
+          ],
+          [
+            "swimming",
+            "Find the name and capacity of the stadium where the event named \"World Junior\" happened."
+          ]
+        ],
+        "overlap_lex_sem": 1,
+        "fused_scores": [
+          0.9332921989726303,
+          0.9166666666666666,
+          0.8215577445125922
+        ]
+      }
+    },
+    {
+      "sample_id": "concert_singer_26",
+      "db_id": "concert_singer",
+      "question": "Which year has most number of concerts?",
+      "gold_sql": "SELECT YEAR FROM concert GROUP BY YEAR ORDER BY count(*) DESC LIMIT 1",
+      "generated_text": "```sql\nSELECT YEAR FROM concert GROUP BY YEAR ORDER BY COUNT(*) DESC LIMIT 1\n```",
+      "extracted_sql": "SELECT YEAR FROM concert GROUP BY YEAR ORDER BY COUNT(*) DESC LIMIT 1",
+      "sql_valid": true,
+      "exact_match": true,
+      "execution_accuracy": true,
+      "execution_error": null,
+      "latency_seconds": 5.617796088001342,
+      "input_tokens": 822,
+      "output_tokens": 73,
+      "schema_diagnostics": {
+        "original_table_count": 4,
+        "selected_table_count": 3,
+        "selected_column_count": 9,
+        "schema_string_length": 367,
+        "schema_reduction_ratio": 0.5714,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.06679060399983427,
+        "lexical_top_k_ids": [
+          [
+            "college_2",
+            "Which year had the greatest number of courses?"
+          ],
+          [
+            "college_2",
+            "Find the number of courses provided in each semester and year."
+          ],
+          [
+            "college_2",
+            "Find the year which offers the largest number of courses."
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "performance_attendance",
+            "What is the date of the performance with the highest number of attendees?"
+          ],
+          [
+            "city_record",
+            "Find the city that hosted the most events."
+          ],
+          [
+            "entertainment_awards",
+            "List the year in which there are more than one festivals."
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "college_2",
+            "Which year had the greatest number of courses?"
+          ],
+          [
+            "performance_attendance",
+            "What is the date of the performance with the highest number of attendees?"
+          ],
+          [
+            "entertainment_awards",
+            "List the year in which there are more than one festivals."
+          ]
+        ],
+        "overlap_lex_sem": 0,
+        "fused_scores": [
+          0.8823198590596824,
+          0.8392857142857143,
+          0.8112150170383104
+        ]
+      }
+    },
+    {
+      "sample_id": "concert_singer_27",
+      "db_id": "concert_singer",
+      "question": "What is the year that had the most concerts?",
+      "gold_sql": "SELECT YEAR FROM concert GROUP BY YEAR ORDER BY count(*) DESC LIMIT 1",
+      "generated_text": "```sql\nSELECT YEAR FROM concert GROUP BY YEAR ORDER BY COUNT(*) DESC LIMIT 1\n```",
+      "extracted_sql": "SELECT YEAR FROM concert GROUP BY YEAR ORDER BY COUNT(*) DESC LIMIT 1",
+      "sql_valid": true,
+      "exact_match": true,
+      "execution_accuracy": true,
+      "execution_error": null,
+      "latency_seconds": 5.617796088001342,
+      "input_tokens": 872,
+      "output_tokens": 73,
+      "schema_diagnostics": {
+        "original_table_count": 4,
+        "selected_table_count": 3,
+        "selected_column_count": 9,
+        "schema_string_length": 367,
+        "schema_reduction_ratio": 0.5714,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.08898670599955949,
+        "lexical_top_k_ids": [
+          [
+            "csu_1",
+            "In what year was the most degrees conferred?"
+          ],
+          [
+            "department_management",
+            "In which year were most departments established?"
+          ],
+          [
+            "ship_1",
+            "In which year were most of ships built?"
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "performance_attendance",
+            "What is the date of the performance with the highest number of attendees?"
+          ],
+          [
+            "city_record",
+            "Find the city that hosted the most events."
+          ],
+          [
+            "city_record",
+            "Which city has hosted the most events?"
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "swimming",
+            "What is the name of the event that happened in the most recent year?"
+          ],
+          [
+            "entertainment_awards",
+            "List the year in which there are more than one festivals."
+          ],
+          [
+            "college_2",
+            "Which year had the greatest number of courses?"
+          ]
+        ],
+        "overlap_lex_sem": 0,
+        "fused_scores": [
+          0.8356188520899653,
+          0.835202586087648,
+          0.8191019989301331
+        ]
+      }
+    },
+    {
+      "sample_id": "concert_singer_28",
+      "db_id": "concert_singer",
+      "question": "Show the stadium names without any concert.",
+      "gold_sql": "SELECT name FROM stadium WHERE stadium_id NOT IN (SELECT stadium_id FROM concert)",
+      "generated_text": "```sql\nSELECT name FROM stadium WHERE stadium_id NOT IN (SELECT stadium_id FROM concert)\n```",
+      "extracted_sql": "SELECT name FROM stadium WHERE stadium_id NOT IN (SELECT stadium_id FROM concert)",
+      "sql_valid": true,
+      "exact_match": true,
+      "execution_accuracy": true,
+      "execution_error": null,
+      "latency_seconds": 5.617796088001342,
+      "input_tokens": 711,
+      "output_tokens": 73,
+      "schema_diagnostics": {
+        "original_table_count": 4,
+        "selected_table_count": 4,
+        "selected_column_count": 17,
+        "schema_string_length": 553,
+        "schema_reduction_ratio": 0.1905,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.07109721700180671,
+        "lexical_top_k_ids": [
+          [
+            "customers_and_invoices",
+            "Show all product names without an order."
+          ],
+          [
+            "theme_gallery",
+            "Show names for artists without any exhibition."
+          ],
+          [
+            "train_station",
+            "Show station names without any trains."
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "train_station",
+            "Show station names without any trains."
+          ],
+          [
+            "theme_gallery",
+            "Show names for artists without any exhibition."
+          ],
+          [
+            "swimming",
+            "Find the names of stadiums which have never had any event."
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "train_station",
+            "Show station names without any trains."
+          ],
+          [
+            "theme_gallery",
+            "Show names for artists without any exhibition."
+          ],
+          [
+            "school_bus",
+            "Show the school name and type for schools without a school bus."
+          ]
+        ],
+        "overlap_lex_sem": 2,
+        "fused_scores": [
+          1.0,
+          0.9470833051480982,
+          0.8335322741177443
+        ]
+      }
+    },
+    {
+      "sample_id": "concert_singer_29",
+      "db_id": "concert_singer",
+      "question": "What are the names of the stadiums without any concerts?",
+      "gold_sql": "SELECT name FROM stadium WHERE stadium_id NOT IN (SELECT stadium_id FROM concert)",
+      "generated_text": "```sql\nSELECT name FROM stadium WHERE stadium_id NOT IN (SELECT stadium_id FROM concert)\n```",
+      "extracted_sql": "SELECT name FROM stadium WHERE stadium_id NOT IN (SELECT stadium_id FROM concert)",
+      "sql_valid": true,
+      "exact_match": true,
+      "execution_accuracy": true,
+      "execution_error": null,
+      "latency_seconds": 5.617796088001342,
+      "input_tokens": 776,
+      "output_tokens": 73,
+      "schema_diagnostics": {
+        "original_table_count": 4,
+        "selected_table_count": 4,
+        "selected_column_count": 17,
+        "schema_string_length": 553,
+        "schema_reduction_ratio": 0.1905,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.077152557001682,
+        "lexical_top_k_ids": [
+          [
+            "swimming",
+            "Find the names of stadiums that the most swimmers have been to."
+          ],
+          [
+            "college_2",
+            "What are the names of courses without prerequisites?"
+          ],
+          [
+            "swimming",
+            "What is the name of the stadium which held the most events?"
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "swimming",
+            "Find the names of stadiums which have never had any event."
+          ],
+          [
+            "protein_institute",
+            "Show the name of buildings that do not have any institution."
+          ],
+          [
+            "sports_competition",
+            "What are the names of all clubs that do not have any players?"
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "swimming",
+            "Find the names of stadiums which have never had any event."
+          ],
+          [
+            "train_station",
+            "Show station names without any trains."
+          ],
+          [
+            "swimming",
+            "What is the name of the stadium which held the most events?"
+          ]
+        ],
+        "overlap_lex_sem": 0,
+        "fused_scores": [
+          0.9642857142857143,
+          0.8203649478467033,
+          0.7853644507410789
+        ]
+      }
+    },
+    {
+      "sample_id": "concert_singer_30",
+      "db_id": "concert_singer",
+      "question": "Show countries where a singer above age 40 and a singer below 30 are from.",
+      "gold_sql": "SELECT country FROM singer WHERE age  >  40 INTERSECT SELECT country FROM singer WHERE age  <  30",
+      "generated_text": "```sql\nSELECT Country FROM singer WHERE Age  >  40 INTERSECT SELECT Country FROM singer WHERE Age  <  30\n```",
+      "extracted_sql": "SELECT Country FROM singer WHERE Age  >  40 INTERSECT SELECT Country FROM singer WHERE Age  <  30",
+      "sql_valid": true,
+      "exact_match": true,
+      "execution_accuracy": true,
+      "execution_error": null,
+      "latency_seconds": 5.617796088001342,
+      "input_tokens": 536,
+      "output_tokens": 73,
+      "schema_diagnostics": {
+        "original_table_count": 4,
+        "selected_table_count": 2,
+        "selected_column_count": 9,
+        "schema_string_length": 292,
+        "schema_reduction_ratio": 0.5714,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.08818548199997167,
+        "lexical_top_k_ids": [
+          [
+            "railway",
+            "Show the countries that have both managers of age above 50 and managers of age below 46."
+          ],
+          [
+            "railway",
+            "Show the countries that have managers of age above 50 or below 46."
+          ],
+          [
+            "network_2",
+            "Find the name of the person who has friends with age above 40 and under age 30?"
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "wedding",
+            "Show the country where people older than 30 and younger than 25 are from."
+          ],
+          [
+            "party_host",
+            "Show the nations that have both hosts older than 45 and hosts younger than 35."
+          ],
+          [
+            "railway",
+            "Show the countries that have managers of age above 50 or below 46."
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "wedding",
+            "Show the country where people older than 30 and younger than 25 are from."
+          ],
+          [
+            "railway",
+            "Show the countries that have managers of age above 50 or below 46."
+          ],
+          [
+            "railway",
+            "Show the countries that have both managers of age above 50 and managers of age below 46."
+          ]
+        ],
+        "overlap_lex_sem": 1,
+        "fused_scores": [
+          0.975,
+          0.8693421699833992,
+          0.8566616200178696
+        ]
+      }
+    },
+    {
+      "sample_id": "concert_singer_31",
+      "db_id": "concert_singer",
+      "question": "Show names for all stadiums except for stadiums having a concert in year 2014.",
+      "gold_sql": "SELECT name FROM stadium EXCEPT SELECT T2.name FROM concert AS T1 JOIN stadium AS T2 ON T1.stadium_id  =  T2.stadium_id WHERE T1.year  =  2014",
+      "generated_text": "```sql\nSELECT name FROM stadium WHERE stadium_id NOT IN (SELECT T1.stadium_id FROM concert AS T1 JOIN singer_in_concert AS T2 ON T1.concert_ID  =  T2.concert_ID WHERE T1.Year  =  2014)\n```",
+      "extracted_sql": "SELECT name FROM stadium WHERE stadium_id NOT IN (SELECT T1.stadium_id FROM concert AS T1 JOIN singer_in_concert AS T2 ON T1.concert_ID  =  T2.concert_ID WHERE T1.Year  =  2014)",
+      "sql_valid": true,
+      "exact_match": false,
+      "execution_accuracy": true,
+      "execution_error": null,
+      "latency_seconds": 5.617796088001342,
+      "input_tokens": 849,
+      "output_tokens": 73,
+      "schema_diagnostics": {
+        "original_table_count": 4,
+        "selected_table_count": 4,
+        "selected_column_count": 18,
+        "schema_string_length": 580,
+        "schema_reduction_ratio": 0.1429,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.3443209149991162,
+        "lexical_top_k_ids": [
+          [
+            "wedding",
+            "Show all church names except for those that had a wedding in year 2015."
+          ],
+          [
+            "wedding",
+            "Show the pair of male and female names in all weddings after year 2014"
+          ],
+          [
+            "storm_record",
+            "Show names for all regions except for Denmark."
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "game_injury",
+            "Show the name, average attendance, total attendance for stadiums where no accidents happened."
+          ],
+          [
+            "swimming",
+            "Find the names of stadiums which have never had any event."
+          ],
+          [
+            "city_record",
+            "List venues of all matches in the order of their dates starting from the most recent one."
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "game_injury",
+            "Show the name, average attendance, total attendance for stadiums where no accidents happened."
+          ],
+          [
+            "wedding",
+            "Show all church names except for those that had a wedding in year 2015."
+          ],
+          [
+            "swimming",
+            "Find the names of stadiums which have never had any event."
+          ]
+        ],
+        "overlap_lex_sem": 0,
+        "fused_scores": [
+          0.90625,
+          0.8905190610841522,
+          0.8625118619079455
+        ]
+      }
+    },
+    {
+      "sample_id": "concert_singer_32",
+      "db_id": "concert_singer",
+      "question": "What are the names of all stadiums that did not have a concert in 2014?",
+      "gold_sql": "SELECT name FROM stadium EXCEPT SELECT T2.name FROM concert AS T1 JOIN stadium AS T2 ON T1.stadium_id  =  T2.stadium_id WHERE T1.year  =  2014",
+      "generated_text": "```sql\nSELECT Name FROM stadium WHERE Stadium_ID NOT IN (SELECT DISTINCT Stadium_ID FROM concert WHERE YEAR = '2014')\n```",
+      "extracted_sql": "SELECT Name FROM stadium WHERE Stadium_ID NOT IN (SELECT DISTINCT Stadium_ID FROM concert WHERE YEAR = '2014')",
+      "sql_valid": true,
+      "exact_match": false,
+      "execution_accuracy": true,
+      "execution_error": null,
+      "latency_seconds": 7.612149386997771,
+      "input_tokens": 843,
+      "output_tokens": 86,
+      "schema_diagnostics": {
+        "original_table_count": 4,
+        "selected_table_count": 4,
+        "selected_column_count": 17,
+        "schema_string_length": 553,
+        "schema_reduction_ratio": 0.1905,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.08778690200051642,
+        "lexical_top_k_ids": [
+          [
+            "swimming",
+            "Find the names of stadiums that the most swimmers have been to."
+          ],
+          [
+            "swimming",
+            "What is the name of the stadium which held the most events?"
+          ],
+          [
+            "swimming",
+            "Find the name of the stadium that has the maximum capacity."
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "swimming",
+            "Find the names of stadiums which have never had any event."
+          ],
+          [
+            "game_injury",
+            "Show the name, average attendance, total attendance for stadiums where no accidents happened."
+          ],
+          [
+            "swimming",
+            "Which countries do not have a stadium that was opened after 2006?"
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "swimming",
+            "Find the names of stadiums which have never had any event."
+          ],
+          [
+            "swimming",
+            "What is the name of the stadium which held the most events?"
+          ],
+          [
+            "game_injury",
+            "Show the name, average attendance, total attendance for stadiums where no accidents happened."
+          ]
+        ],
+        "overlap_lex_sem": 0,
+        "fused_scores": [
+          0.9642857142857143,
+          0.8429695663274703,
+          0.8091415593208283
+        ]
+      }
+    },
+    {
+      "sample_id": "concert_singer_33",
+      "db_id": "concert_singer",
+      "question": "Show the name and theme for all concerts and the number of singers in each concert.",
+      "gold_sql": "SELECT T2.concert_name ,  T2.theme ,  count(*) FROM singer_in_concert AS T1 JOIN concert AS T2 ON T1.concert_id  =  T2.concert_id GROUP BY T2.concert_id",
+      "generated_text": "```sql\nSELECT T1.concert_Name ,  T1.Theme ,  COUNT(T2.Singer_ID) \nFROM concert AS T1 \nJOIN singer_in_concert AS T2 ON T1.concert_ID  =  T2.concert_ID \nGROUP BY T1.concert_ID\n```",
+      "extracted_sql": "SELECT T1.concert_Name ,  T1.Theme ,  COUNT(T2.Singer_ID) \nFROM concert AS T1 \nJOIN singer_in_concert AS T2 ON T1.concert_ID  =  T2.concert_ID \nGROUP BY T1.concert_ID",
+      "sql_valid": true,
+      "exact_match": false,
+      "execution_accuracy": false,
+      "execution_error": null,
+      "latency_seconds": 7.612149386997771,
+      "input_tokens": 872,
+      "output_tokens": 86,
+      "schema_diagnostics": {
+        "original_table_count": 4,
+        "selected_table_count": 4,
+        "selected_column_count": 16,
+        "schema_string_length": 544,
+        "schema_reduction_ratio": 0.2381,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.07267093500195188,
+        "lexical_top_k_ids": [
+          [
+            "protein_institute",
+            "For each building, show the name of the building and the number of institutions in it."
+          ],
+          [
+            "flight_1",
+            "Show aircraft names and number of flights for each aircraft."
+          ],
+          [
+            "theme_gallery",
+            "Show all artist names and the number of exhibitions for each artist."
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "theme_gallery",
+            "Show all artist names and the number of exhibitions for each artist."
+          ],
+          [
+            "performance_attendance",
+            "Show different locations and the number of performances at each location."
+          ],
+          [
+            "music_4",
+            "Please show the categories of the music festivals and the count."
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "theme_gallery",
+            "Show all artist names and the number of exhibitions for each artist."
+          ],
+          [
+            "party_people",
+            "Show party names and the number of events for each party."
+          ],
+          [
+            "party_people",
+            "Show all party names and the number of members in each party."
+          ]
+        ],
+        "overlap_lex_sem": 1,
+        "fused_scores": [
+          1.0,
+          0.9274900422540701,
+          0.9072411757666033
+        ]
+      }
+    },
+    {
+      "sample_id": "concert_singer_34",
+      "db_id": "concert_singer",
+      "question": "What are the names, themes, and number of singers for each and every concert?",
+      "gold_sql": "SELECT T2.concert_name ,  T2.theme ,  count(*) FROM singer_in_concert AS T1 JOIN concert AS T2 ON T1.concert_id  =  T2.concert_id GROUP BY T2.concert_id",
+      "generated_text": "```sql\nSELECT T1.concert_Name ,  T1.Theme ,  COUNT(T2.Singer_ID) \nFROM concert AS T1 \nJOIN singer_in_concert AS T2 ON T1.concert_ID  =  T2.concert_ID \nGROUP BY T1.concert_ID\n```",
+      "extracted_sql": "SELECT T1.concert_Name ,  T1.Theme ,  COUNT(T2.Singer_ID) \nFROM concert AS T1 \nJOIN singer_in_concert AS T2 ON T1.concert_ID  =  T2.concert_ID \nGROUP BY T1.concert_ID",
+      "sql_valid": true,
+      "exact_match": false,
+      "execution_accuracy": false,
+      "execution_error": null,
+      "latency_seconds": 7.612149386997771,
+      "input_tokens": 818,
+      "output_tokens": 86,
+      "schema_diagnostics": {
+        "original_table_count": 4,
+        "selected_table_count": 4,
+        "selected_column_count": 16,
+        "schema_string_length": 544,
+        "schema_reduction_ratio": 0.2381,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.09417280499837943,
+        "lexical_top_k_ids": [
+          [
+            "gas_company",
+            "What is the name and rank of every company ordered by descending number of sales?"
+          ],
+          [
+            "shop_membership",
+            "What are the card numbers, names, and hometowns of every member ordered by descending level?"
+          ],
+          [
+            "party_people",
+            "What is the name of party with most number of members?"
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "chinook_1",
+            "List the names of all music genres."
+          ],
+          [
+            "music_2",
+            "How many songs are there?"
+          ],
+          [
+            "performance_attendance",
+            "What are the dates and locations of performances?"
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "theme_gallery",
+            "Show all artist names and the number of exhibitions for each artist."
+          ],
+          [
+            "musical",
+            "Show names of musicals and the number of actors who have appeared in the musicals."
+          ],
+          [
+            "music_1",
+            "What are the names of all songs that are ordered by their resolution numbers?"
+          ]
+        ],
+        "overlap_lex_sem": 0,
+        "fused_scores": [
+          0.9351915752906221,
+          0.8671845628958865,
+          0.860789635322172
+        ]
+      }
+    },
+    {
+      "sample_id": "concert_singer_35",
+      "db_id": "concert_singer",
+      "question": "List singer names and number of concerts for each singer.",
+      "gold_sql": "SELECT T2.name ,  count(*) FROM singer_in_concert AS T1 JOIN singer AS T2 ON T1.singer_id  =  T2.singer_id GROUP BY T2.singer_id",
+      "generated_text": "```sql\nSELECT T2.Name ,  COUNT(*) FROM singer_in_concert AS T1 JOIN singer AS T2 ON T1.Singer_ID  =  T2.Singer_ID GROUP BY T1.Singer_ID\n```",
+      "extracted_sql": "SELECT T2.Name ,  COUNT(*) FROM singer_in_concert AS T1 JOIN singer AS T2 ON T1.Singer_ID  =  T2.Singer_ID GROUP BY T1.Singer_ID",
+      "sql_valid": true,
+      "exact_match": false,
+      "execution_accuracy": true,
+      "execution_error": null,
+      "latency_seconds": 7.612149386997771,
+      "input_tokens": 860,
+      "output_tokens": 86,
+      "schema_diagnostics": {
+        "original_table_count": 4,
+        "selected_table_count": 4,
+        "selected_column_count": 16,
+        "schema_string_length": 544,
+        "schema_reduction_ratio": 0.2381,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.06175724400236504,
+        "lexical_top_k_ids": [
+          [
+            "film_rank",
+            "List the name of film studio that have the most number of films."
+          ],
+          [
+            "tracking_software_problems",
+            "How many problems does the product with the most problems have? List the number of the problems and product name."
+          ],
+          [
+            "e_learning",
+            "List the name and the number of enrolled student for each course."
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "music_2",
+            "Count the number of songs."
+          ],
+          [
+            "theme_gallery",
+            "Show all artist names and the number of exhibitions for each artist."
+          ],
+          [
+            "performance_attendance",
+            "Show the names of members and the location of the performances they attended."
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "store_1",
+            "List the name of all playlist."
+          ],
+          [
+            "theme_gallery",
+            "Show all artist names and the number of exhibitions for each artist."
+          ],
+          [
+            "chinook_1",
+            "List the names of all music genres."
+          ]
+        ],
+        "overlap_lex_sem": 0,
+        "fused_scores": [
+          0.9074060240870213,
+          0.883358218208078,
+          0.8739600858267565
+        ]
+      }
+    },
+    {
+      "sample_id": "concert_singer_36",
+      "db_id": "concert_singer",
+      "question": "What are the names of the singers and number of concerts for each person?",
+      "gold_sql": "SELECT T2.name ,  count(*) FROM singer_in_concert AS T1 JOIN singer AS T2 ON T1.singer_id  =  T2.singer_id GROUP BY T2.singer_id",
+      "generated_text": "```sql\nSELECT T2.Name ,  COUNT(*) FROM singer_in_concert AS T1 JOIN singer AS T2 ON T1.Singer_ID  =  T2.Singer_ID GROUP BY T1.Singer_ID\n```",
+      "extracted_sql": "SELECT T2.Name ,  COUNT(*) FROM singer_in_concert AS T1 JOIN singer AS T2 ON T1.Singer_ID  =  T2.Singer_ID GROUP BY T1.Singer_ID",
+      "sql_valid": true,
+      "exact_match": false,
+      "execution_accuracy": true,
+      "execution_error": null,
+      "latency_seconds": 7.612149386997771,
+      "input_tokens": 711,
+      "output_tokens": 86,
+      "schema_diagnostics": {
+        "original_table_count": 4,
+        "selected_table_count": 4,
+        "selected_column_count": 16,
+        "schema_string_length": 544,
+        "schema_reduction_ratio": 0.2381,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.09482006100006402,
+        "lexical_top_k_ids": [
+          [
+            "network_2",
+            "What is the name of the person who is the oldest?"
+          ],
+          [
+            "party_people",
+            "What is the name of party with most number of members?"
+          ],
+          [
+            "document_management",
+            "What is the name of the document with the most number of sections?"
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "performance_attendance",
+            "Show the names of members and the location of the performances they attended."
+          ],
+          [
+            "entertainment_awards",
+            "What are the total number of the audiences who visited any of the festivals?"
+          ],
+          [
+            "performance_attendance",
+            "Show the names of members and the dates of performances they attended in descending order of attendance of the performances."
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "theme_gallery",
+            "Show all artist names and the number of exhibitions for each artist."
+          ],
+          [
+            "musical",
+            "Show names of musicals and the number of actors who have appeared in the musicals."
+          ],
+          [
+            "entertainment_awards",
+            "What are the total number of the audiences who visited any of the festivals?"
+          ]
+        ],
+        "overlap_lex_sem": 0,
+        "fused_scores": [
+          0.8671607780944722,
+          0.8469672680030864,
+          0.8256597781442623
+        ]
+      }
+    },
+    {
+      "sample_id": "concert_singer_37",
+      "db_id": "concert_singer",
+      "question": "List all singer names in concerts in year 2014.",
+      "gold_sql": "SELECT T2.name FROM singer_in_concert AS T1 JOIN singer AS T2 ON T1.singer_id  =  T2.singer_id JOIN concert AS T3 ON T1.concert_id  =  T3.concert_id WHERE T3.year  =  2014",
+      "generated_text": "```sql\nSELECT T2.Name FROM concert AS T1 JOIN singer_in_concert AS T3 ON T1.concert_ID  =  T3.concert_ID JOIN singer AS T2 ON T3.Singer_ID  =  T2.Singer_ID WHERE T1.Year  =  '2014'\n```",
+      "extracted_sql": "SELECT T2.Name FROM concert AS T1 JOIN singer_in_concert AS T3 ON T1.concert_ID  =  T3.concert_ID JOIN singer AS T2 ON T3.Singer_ID  =  T2.Singer_ID WHERE T1.Year  =  '2014'",
+      "sql_valid": true,
+      "exact_match": false,
+      "execution_accuracy": true,
+      "execution_error": null,
+      "latency_seconds": 7.612149386997771,
+      "input_tokens": 884,
+      "output_tokens": 86,
+      "schema_diagnostics": {
+        "original_table_count": 4,
+        "selected_table_count": 4,
+        "selected_column_count": 16,
+        "schema_string_length": 544,
+        "schema_reduction_ratio": 0.2381,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.06515591799688991,
+        "lexical_top_k_ids": [
+          [
+            "swimming",
+            "List all the event names by year from the most recent to the oldest."
+          ],
+          [
+            "phone_1",
+            "List all the model names sorted by their launch year."
+          ],
+          [
+            "department_management",
+            "List the creation year, name and budget of each department."
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "music_4",
+            "List the age of all music artists."
+          ],
+          [
+            "music_1",
+            "List the name and gender for all artists who released songs in March."
+          ],
+          [
+            "performance_attendance",
+            "Show the names of members and the location of the performances they attended."
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "store_1",
+            "List the name of all playlist."
+          ],
+          [
+            "wedding",
+            "Show the pair of male and female names in all weddings after year 2014"
+          ],
+          [
+            "chinook_1",
+            "List the names of all music genres."
+          ]
+        ],
+        "overlap_lex_sem": 0,
+        "fused_scores": [
+          0.9253937727761107,
+          0.9135731541181968,
+          0.9133143632061034
+        ]
+      }
+    },
+    {
+      "sample_id": "concert_singer_38",
+      "db_id": "concert_singer",
+      "question": "What are the names of the singers who performed in a concert in 2014?",
+      "gold_sql": "SELECT T2.name FROM singer_in_concert AS T1 JOIN singer AS T2 ON T1.singer_id  =  T2.singer_id JOIN concert AS T3 ON T1.concert_id  =  T3.concert_id WHERE T3.year  =  2014",
+      "generated_text": "```sql\nSELECT T2.Name FROM singer_in_concert AS T1 JOIN singer AS T2 ON T1.Singer_ID  =  T2.Singer_ID JOIN concert AS T3 ON T1.concert_ID  =  T3.concert_ID WHERE T3.Year  =  \"2014\"\n```",
+      "extracted_sql": "SELECT T2.Name FROM singer_in_concert AS T1 JOIN singer AS T2 ON T1.Singer_ID  =  T2.Singer_ID JOIN concert AS T3 ON T1.concert_ID  =  T3.concert_ID WHERE T3.Year  =  \"2014\"",
+      "sql_valid": true,
+      "exact_match": false,
+      "execution_accuracy": true,
+      "execution_error": null,
+      "latency_seconds": 7.612149386997771,
+      "input_tokens": 1142,
+      "output_tokens": 86,
+      "schema_diagnostics": {
+        "original_table_count": 4,
+        "selected_table_count": 4,
+        "selected_column_count": 16,
+        "schema_string_length": 544,
+        "schema_reduction_ratio": 0.2381,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.0714447829996061,
+        "lexical_top_k_ids": [
+          [
+            "music_1",
+            "What are the names of all singers that are from the UK and released a song in English?"
+          ],
+          [
+            "formula_1",
+            "What are the unique names of all race held between 2014 and 2017?"
+          ],
+          [
+            "music_2",
+            "Find all the songs performed by artist with last name \"Heilo\""
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "performance_attendance",
+            "Show the names of members and the location of the performances they attended."
+          ],
+          [
+            "music_1",
+            "What are the names of all singers that are from the UK and released a song in English?"
+          ],
+          [
+            "performance_attendance",
+            "What are the dates and locations of performances?"
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "music_1",
+            "What are the names of all singers that are from the UK and released a song in English?"
+          ],
+          [
+            "formula_1",
+            "What are the unique names of all race held between 2014 and 2017?"
+          ],
+          [
+            "music_2",
+            "Find all the songs performed by artist with last name \"Heilo\""
+          ]
+        ],
+        "overlap_lex_sem": 1,
+        "fused_scores": [
+          0.9758732679304363,
+          0.9488150960090785,
+          0.8967139442497061
+        ]
+      }
+    },
+    {
+      "sample_id": "concert_singer_39",
+      "db_id": "concert_singer",
+      "question": "what is the name and nation of the singer who have a song having 'Hey' in its name?",
+      "gold_sql": "SELECT name ,  country FROM singer WHERE song_name LIKE '%Hey%'",
+      "generated_text": "```sql\nSELECT T1.Name, T1.Country FROM singer AS T1 JOIN singer_in_concert AS T2 ON T1.Singer_ID  =  T2.Singer_ID JOIN concert AS T3 ON T2.concert_ID  =  T3.concert_ID JOIN song AS T4 ON T1.Song_Name  =  T4.song_name WHERE T4.song_name LIKE '%Hey%'\n```",
+      "extracted_sql": "SELECT T1.Name, T1.Country FROM singer AS T1 JOIN singer_in_concert AS T2 ON T1.Singer_ID  =  T2.Singer_ID JOIN concert AS T3 ON T2.concert_ID  =  T3.concert_ID JOIN song AS T4 ON T1.Song_Name  =  T4.song_name WHERE T4.song_name LIKE '%Hey%'",
+      "sql_valid": false,
+      "exact_match": false,
+      "execution_accuracy": false,
+      "execution_error": "no such table: song",
+      "latency_seconds": 7.612149386997771,
+      "input_tokens": 1016,
+      "output_tokens": 86,
+      "schema_diagnostics": {
+        "original_table_count": 4,
+        "selected_table_count": 4,
+        "selected_column_count": 13,
+        "schema_string_length": 460,
+        "schema_reduction_ratio": 0.381,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.0929273359979561,
+        "lexical_top_k_ids": [
+          [
+            "music_1",
+            "What are the names of all singers that are from the UK and released a song in English?"
+          ],
+          [
+            "music_1",
+            "Return the names of singers who are from UK and released an English song."
+          ],
+          [
+            "music_1",
+            "What are the names of all songs in English?"
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "music_1",
+            "Find the country of origin for the artist who made the least number of songs?"
+          ],
+          [
+            "music_1",
+            "What are the names and number of works for all artists who have sung at least one song in English?"
+          ],
+          [
+            "music_1",
+            "What is the name and country of origin of the artist who released a song that has \"love\" in its title?"
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "music_1",
+            "What are the names of all singers that are from the UK and released a song in English?"
+          ],
+          [
+            "music_2",
+            "What is the last name of the artist who sang the most songs?"
+          ],
+          [
+            "music_1",
+            "What are the names of the singers who sang the top 3 most highly rated songs and what countries do they hail from?"
+          ]
+        ],
+        "overlap_lex_sem": 0,
+        "fused_scores": [
+          0.9147594097110294,
+          0.8586449806890856,
+          0.8538659057756806
+        ]
+      }
+    },
+    {
+      "sample_id": "concert_singer_40",
+      "db_id": "concert_singer",
+      "question": "What is the name and country of origin of every singer who has a song with the word 'Hey' in its title?",
+      "gold_sql": "SELECT name ,  country FROM singer WHERE song_name LIKE '%Hey%'",
+      "generated_text": "```sql\nSELECT T1.Name ,  T1.Country FROM singer AS T1 JOIN singer_in_concert AS T2 ON T1.Singer_ID  =  T2.Singer_ID JOIN concert AS T3 ON T2.concert_ID  =  T3.concert_ID JOIN song AS T4 ON T1.Song_Name  =  T4.song_name WHERE T4.song_name LIKE \"%Hey%\"\n```",
+      "extracted_sql": "SELECT T1.Name ,  T1.Country FROM singer AS T1 JOIN singer_in_concert AS T2 ON T1.Singer_ID  =  T2.Singer_ID JOIN concert AS T3 ON T2.concert_ID  =  T3.concert_ID JOIN song AS T4 ON T1.Song_Name  =  T4.song_name WHERE T4.song_name LIKE \"%Hey%\"",
+      "sql_valid": false,
+      "exact_match": false,
+      "execution_accuracy": false,
+      "execution_error": "no such table: song",
+      "latency_seconds": 8.171928799998568,
+      "input_tokens": 1123,
+      "output_tokens": 97,
+      "schema_diagnostics": {
+        "original_table_count": 4,
+        "selected_table_count": 4,
+        "selected_column_count": 13,
+        "schema_string_length": 460,
+        "schema_reduction_ratio": 0.381,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.3628889489991707,
+        "lexical_top_k_ids": [
+          [
+            "music_1",
+            "What is the name and country of origin of the artist who released a song that has \"love\" in its title?"
+          ],
+          [
+            "music_2",
+            "What are the names of the songs whose title has the word \"the\"?"
+          ],
+          [
+            "music_1",
+            "List the name and country of origin for all singers who have produced songs with rating above 9."
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "music_1",
+            "What is the name and country of origin of the artist who released a song that has \"love\" in its title?"
+          ],
+          [
+            "music_1",
+            "Find the country of origin for the artist who made the least number of songs?"
+          ],
+          [
+            "music_1",
+            "What are the names of the artists who released a song that has the word love in its title, and where are the artists from?"
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "music_1",
+            "What is the name and country of origin of the artist who released a song that has \"love\" in its title?"
+          ],
+          [
+            "music_1",
+            "What are the names of the artists who released a song that has the word love in its title, and where are the artists from?"
+          ],
+          [
+            "music_1",
+            "List the name and country of origin for all singers who have produced songs with rating above 9."
+          ]
+        ],
+        "overlap_lex_sem": 1,
+        "fused_scores": [
+          1.0,
+          0.9168447289793389,
+          0.8841647166958866
+        ]
+      }
+    },
+    {
+      "sample_id": "concert_singer_41",
+      "db_id": "concert_singer",
+      "question": "Find the name and location of the stadiums which some concerts happened in the years of both 2014 and 2015.",
+      "gold_sql": "SELECT T2.name ,  T2.location FROM concert AS T1 JOIN stadium AS T2 ON T1.stadium_id  =  T2.stadium_id WHERE T1.Year  =  2014 INTERSECT SELECT T2.name ,  T2.location FROM concert AS T1 JOIN stadium AS T2 ON T1.stadium_id  =  T2.stadium_id WHERE T1.Year  =  2015",
+      "generated_text": "```sql\nSELECT T3.Name, T3.Location FROM concert AS T1 INNER JOIN singer_in_concert AS T2 ON T1.concert_ID = T2.concert_ID INNER JOIN stadium AS T3 ON T1.Stadium_ID = T3.Stadium_ID WHERE T1.Year IN ('2014', '2015') GROUP BY T3.Name, T3.Location HAVING COUNT(DISTINCT T1.Year) = 2\n```",
+      "extracted_sql": "SELECT T3.Name, T3.Location FROM concert AS T1 INNER JOIN singer_in_concert AS T2 ON T1.concert_ID = T2.concert_ID INNER JOIN stadium AS T3 ON T1.Stadium_ID = T3.Stadium_ID WHERE T1.Year IN ('2014', '2015') GROUP BY T3.Name, T3.Location HAVING COUNT(DISTINCT T1.Year) = 2",
+      "sql_valid": true,
+      "exact_match": false,
+      "execution_accuracy": true,
+      "execution_error": null,
+      "latency_seconds": 8.171928799998568,
+      "input_tokens": 922,
+      "output_tokens": 97,
+      "schema_diagnostics": {
+        "original_table_count": 4,
+        "selected_table_count": 4,
+        "selected_column_count": 18,
+        "schema_string_length": 580,
+        "schema_reduction_ratio": 0.1429,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.0624027899975772,
+        "lexical_top_k_ids": [
+          [
+            "swimming",
+            "Find the names of stadiums that the most swimmers have been to."
+          ],
+          [
+            "swimming",
+            "Find the name and capacity of the stadium where the event named \"World Junior\" happened."
+          ],
+          [
+            "swimming",
+            "Find the name of the stadium that has the maximum capacity."
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "performance_attendance",
+            "Show the locations that have at least two performances."
+          ],
+          [
+            "swimming",
+            "Find the country that has the most stadiums."
+          ],
+          [
+            "swimming",
+            "How many stadiums are there?"
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "swimming",
+            "Find the name and capacity of the stadium where the event named \"World Junior\" happened."
+          ],
+          [
+            "swimming",
+            "Find the names of stadiums which have never had any event."
+          ],
+          [
+            "swimming",
+            "Find the names of stadiums that the most swimmers have been to."
+          ]
+        ],
+        "overlap_lex_sem": 0,
+        "fused_scores": [
+          0.9723657618686241,
+          0.9643140637648386,
+          0.9435998067459231
+        ]
+      }
+    },
+    {
+      "sample_id": "concert_singer_42",
+      "db_id": "concert_singer",
+      "question": "What are the names and locations of the stadiums that had concerts that occurred in both 2014 and 2015?",
+      "gold_sql": "SELECT T2.name ,  T2.location FROM concert AS T1 JOIN stadium AS T2 ON T1.stadium_id  =  T2.stadium_id WHERE T1.Year  =  2014 INTERSECT SELECT T2.name ,  T2.location FROM concert AS T1 JOIN stadium AS T2 ON T1.stadium_id  =  T2.stadium_id WHERE T1.Year  =  2015",
+      "generated_text": "```sql\nSELECT T1.Name, T1.Location FROM stadium AS T1 JOIN concert AS T2 ON T1.Stadium_ID  =  T2.Stadium_ID WHERE T2.Year IN ('2014', '2015') GROUP BY T1.Name, T1.Location HAVING COUNT(DISTINCT T2.Year) = 2\n```",
+      "extracted_sql": "SELECT T1.Name, T1.Location FROM stadium AS T1 JOIN concert AS T2 ON T1.Stadium_ID  =  T2.Stadium_ID WHERE T2.Year IN ('2014', '2015') GROUP BY T1.Name, T1.Location HAVING COUNT(DISTINCT T2.Year) = 2",
+      "sql_valid": true,
+      "exact_match": false,
+      "execution_accuracy": true,
+      "execution_error": null,
+      "latency_seconds": 8.171928799998568,
+      "input_tokens": 839,
+      "output_tokens": 97,
+      "schema_diagnostics": {
+        "original_table_count": 4,
+        "selected_table_count": 4,
+        "selected_column_count": 17,
+        "schema_string_length": 553,
+        "schema_reduction_ratio": 0.1905,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.06608397799936938,
+        "lexical_top_k_ids": [
+          [
+            "cre_Doc_Tracking_DB",
+            "What are all the location codes and location names?"
+          ],
+          [
+            "cre_Theme_park",
+            "What are the distinct location names?"
+          ],
+          [
+            "wrestler",
+            "What are the names and location of the wrestlers?"
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "swimming",
+            "What is the name of the stadium which held the most events?"
+          ],
+          [
+            "city_record",
+            "What is id of the city that hosted events in the most recent year?"
+          ],
+          [
+            "performance_attendance",
+            "What are the dates and locations of performances?"
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "swimming",
+            "What is the name of the stadium which held the most events?"
+          ],
+          [
+            "game_injury",
+            "What are the id and name of the stadium where the most injury accidents happened?"
+          ],
+          [
+            "swimming",
+            "Find the names of stadiums which have never had any event."
+          ]
+        ],
+        "overlap_lex_sem": 0,
+        "fused_scores": [
+          0.9722222222222222,
+          0.8545792279873219,
+          0.8387854018601373
+        ]
+      }
+    },
+    {
+      "sample_id": "concert_singer_43",
+      "db_id": "concert_singer",
+      "question": "Find the number of concerts happened in the stadium with the highest capacity.",
+      "gold_sql": "SELECT count(*) FROM concert AS T1 JOIN stadium AS T2 ON T1.stadium_id  =  T2.stadium_id ORDER BY T2.Capacity DESC LIMIT 1",
+      "generated_text": "```sql\nSELECT COUNT(concert_ID) FROM concert WHERE Stadium_ID = (SELECT Stadium_ID FROM stadium ORDER BY Capacity DESC LIMIT 1)\n```",
+      "extracted_sql": "SELECT COUNT(concert_ID) FROM concert WHERE Stadium_ID = (SELECT Stadium_ID FROM stadium ORDER BY Capacity DESC LIMIT 1)",
+      "sql_valid": true,
+      "exact_match": false,
+      "execution_accuracy": false,
+      "execution_error": null,
+      "latency_seconds": 8.171928799998568,
+      "input_tokens": 755,
+      "output_tokens": 97,
+      "schema_diagnostics": {
+        "original_table_count": 4,
+        "selected_table_count": 3,
+        "selected_column_count": 14,
+        "schema_string_length": 441,
+        "schema_reduction_ratio": 0.3333,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.07227600799888023,
+        "lexical_top_k_ids": [
+          [
+            "swimming",
+            "Find the name and capacity of the stadium where the event named \"World Junior\" happened."
+          ],
+          [
+            "swimming",
+            "Find the name of the stadium that has the maximum capacity."
+          ],
+          [
+            "customer_deliveries",
+            "Find the name of route that has the highest number of deliveries."
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "swimming",
+            "Find the name of the stadium that has the maximum capacity."
+          ],
+          [
+            "performance_attendance",
+            "What is the date of the performance with the highest number of attendees?"
+          ],
+          [
+            "game_injury",
+            "Find the id and name of the stadium where the largest number of injury accidents occurred."
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "swimming",
+            "Find the name of the stadium that has the maximum capacity."
+          ],
+          [
+            "swimming",
+            "Find the name and capacity of the stadium where the event named \"World Junior\" happened."
+          ],
+          [
+            "game_injury",
+            "Find the id and name of the stadium where the largest number of injury accidents occurred."
+          ]
+        ],
+        "overlap_lex_sem": 1,
+        "fused_scores": [
+          1.0,
+          0.8932888496558368,
+          0.8229822724324076
+        ]
+      }
+    },
+    {
+      "sample_id": "concert_singer_44",
+      "db_id": "concert_singer",
+      "question": "What are the number of concerts that occurred in the stadium with the largest capacity?",
+      "gold_sql": "SELECT count(*) FROM concert AS T1 JOIN stadium AS T2 ON T1.stadium_id  =  T2.stadium_id ORDER BY T2.Capacity DESC LIMIT 1",
+      "generated_text": "```sql\nSELECT COUNT(T1.concert_ID) FROM concert AS T1 JOIN stadium AS T2 ON T1.Stadium_ID  =  T2.Stadium_ID ORDER BY T2.Capacity DESC LIMIT 1\n```",
+      "extracted_sql": "SELECT COUNT(T1.concert_ID) FROM concert AS T1 JOIN stadium AS T2 ON T1.Stadium_ID  =  T2.Stadium_ID ORDER BY T2.Capacity DESC LIMIT 1",
+      "sql_valid": true,
+      "exact_match": false,
+      "execution_accuracy": false,
+      "execution_error": null,
+      "latency_seconds": 8.171928799998568,
+      "input_tokens": 752,
+      "output_tokens": 97,
+      "schema_diagnostics": {
+        "original_table_count": 4,
+        "selected_table_count": 3,
+        "selected_column_count": 14,
+        "schema_string_length": 441,
+        "schema_reduction_ratio": 0.3333,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.06909651300156838,
+        "lexical_top_k_ids": [
+          [
+            "game_injury",
+            "Find the id and name of the stadium where the largest number of injury accidents occurred."
+          ],
+          [
+            "dorm_1",
+            "What are the names of the dorm with the largest capacity?"
+          ],
+          [
+            "election_representative",
+            "What is the party that has the largest number of representatives?"
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "swimming",
+            "What is the name of the stadium which held the most events?"
+          ],
+          [
+            "swimming",
+            "How many stadiums are there?"
+          ],
+          [
+            "game_injury",
+            "How many games has each stadium held?"
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "game_injury",
+            "Find the id and name of the stadium where the largest number of injury accidents occurred."
+          ],
+          [
+            "swimming",
+            "Find the name of the stadium that has the maximum capacity."
+          ],
+          [
+            "swimming",
+            "What is the name of the stadium which held the most events?"
+          ]
+        ],
+        "overlap_lex_sem": 0,
+        "fused_scores": [
+          0.8880952106983774,
+          0.8484106557798625,
+          0.8263888888888888
+        ]
+      }
+    },
+    {
+      "sample_id": "pets_1_45",
+      "db_id": "pets_1",
+      "question": "Find the number of pets whose weight is heavier than 10.",
+      "gold_sql": "SELECT count(*) FROM pets WHERE weight  >  10",
+      "generated_text": "```sql\nSELECT COUNT(*) FROM Pets WHERE weight > 10\n```",
+      "extracted_sql": "SELECT COUNT(*) FROM Pets WHERE weight > 10",
+      "sql_valid": true,
+      "exact_match": true,
+      "execution_accuracy": true,
+      "execution_error": null,
+      "latency_seconds": 8.171928799998568,
+      "input_tokens": 701,
+      "output_tokens": 97,
+      "schema_diagnostics": {
+        "original_table_count": 3,
+        "selected_table_count": 2,
+        "selected_column_count": 6,
+        "schema_string_length": 199,
+        "schema_reduction_ratio": 0.5714,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.0733831640027347,
+        "lexical_top_k_ids": [
+          [
+            "tracking_software_problems",
+            "Find all the ids and dates of the logs for the problem whose id is 10."
+          ],
+          [
+            "company_office",
+            "Find the number of companies whose industry is \"Banking\" or \"Conglomerate\","
+          ],
+          [
+            "store_1",
+            "Find the number of employees whose title is IT Staff from each city?"
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "candidate_poll",
+            "Count the number of people of each sex who have a weight higher than 85."
+          ],
+          [
+            "products_gen_characteristics",
+            "Count the number of characteristics."
+          ],
+          [
+            "network_2",
+            "Find the number of people who is under 40 for each gender."
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "tracking_software_problems",
+            "Find all the ids and dates of the logs for the problem whose id is 10."
+          ],
+          [
+            "candidate_poll",
+            "Count the number of people of each sex who have a weight higher than 85."
+          ],
+          [
+            "music_2",
+            "Find the number of bands."
+          ]
+        ],
+        "overlap_lex_sem": 0,
+        "fused_scores": [
+          0.9057167864384625,
+          0.9027777777777778,
+          0.8781816255496013
+        ]
+      }
+    },
+    {
+      "sample_id": "pets_1_46",
+      "db_id": "pets_1",
+      "question": "How many pets have a greater weight than 10?",
+      "gold_sql": "SELECT count(*) FROM pets WHERE weight  >  10",
+      "generated_text": "```sql\nSELECT COUNT(*) FROM Pets WHERE weight > 10\n```",
+      "extracted_sql": "SELECT COUNT(*) FROM Pets WHERE weight > 10",
+      "sql_valid": true,
+      "exact_match": true,
+      "execution_accuracy": true,
+      "execution_error": null,
+      "latency_seconds": 8.171928799998568,
+      "input_tokens": 706,
+      "output_tokens": 97,
+      "schema_diagnostics": {
+        "original_table_count": 3,
+        "selected_table_count": 2,
+        "selected_column_count": 6,
+        "schema_string_length": 199,
+        "schema_reduction_ratio": 0.5714,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.07950949299993226,
+        "lexical_top_k_ids": [
+          [
+            "sports_competition",
+            "How many clubs have total medals less than 10?"
+          ],
+          [
+            "csu_1",
+            "How many universities have a campus fee greater than the average?"
+          ],
+          [
+            "soccer_1",
+            "Of all players with an overall rating greater than 80, how many are right-footed and left-footed?"
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "allergy_1",
+            "How many allergies have type animal?"
+          ],
+          [
+            "products_gen_characteristics",
+            "Count the number of characteristics."
+          ],
+          [
+            "candidate_poll",
+            "Count the number of people of each sex who have a weight higher than 85."
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "store_1",
+            "List title of albums have the number of tracks greater than 10."
+          ],
+          [
+            "sports_competition",
+            "How many clubs have total medals less than 10?"
+          ],
+          [
+            "allergy_1",
+            "How many allergies have type animal?"
+          ]
+        ],
+        "overlap_lex_sem": 0,
+        "fused_scores": [
+          0.8959284414511615,
+          0.8941755952376671,
+          0.890625
+        ]
+      }
+    },
+    {
+      "sample_id": "pets_1_47",
+      "db_id": "pets_1",
+      "question": "Find the weight of the youngest dog.",
+      "gold_sql": "SELECT weight FROM pets ORDER BY pet_age LIMIT 1",
+      "generated_text": "```sql\nSELECT weight FROM Pets WHERE species = 'Dog' ORDER BY birthdate ASC LIMIT 1\n```",
+      "extracted_sql": "SELECT weight FROM Pets WHERE species = 'Dog' ORDER BY birthdate ASC LIMIT 1",
+      "sql_valid": false,
+      "exact_match": false,
+      "execution_accuracy": false,
+      "execution_error": "no such column: species",
+      "latency_seconds": 8.171928799998568,
+      "input_tokens": 445,
+      "output_tokens": 97,
+      "schema_diagnostics": {
+        "original_table_count": 3,
+        "selected_table_count": 1,
+        "selected_column_count": 2,
+        "schema_string_length": 76,
+        "schema_reduction_ratio": 0.8571,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.06706461700014188,
+        "lexical_top_k_ids": [
+          [
+            "e_government",
+            "Find the name of the youngest organization."
+          ],
+          [
+            "candidate_poll",
+            "Find the average and minimum weight for each gender."
+          ],
+          [
+            "candidate_poll",
+            "Find the average height and weight for all males (sex is M)."
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "entrepreneur",
+            "Return the weight of the shortest person."
+          ],
+          [
+            "candidate_poll",
+            "Find the average and minimum weight for each gender."
+          ],
+          [
+            "entrepreneur",
+            "What is the weight of the shortest person?"
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "candidate_poll",
+            "Find the average and minimum weight for each gender."
+          ],
+          [
+            "e_government",
+            "Find the name of the youngest organization."
+          ],
+          [
+            "entrepreneur",
+            "Return the weight of the shortest person."
+          ]
+        ],
+        "overlap_lex_sem": 1,
+        "fused_scores": [
+          0.9335683526143984,
+          0.8808088888566924,
+          0.8571428571428571
+        ]
+      }
+    },
+    {
+      "sample_id": "pets_1_48",
+      "db_id": "pets_1",
+      "question": "How much does the youngest dog weigh?",
+      "gold_sql": "SELECT weight FROM pets ORDER BY pet_age LIMIT 1",
+      "generated_text": "```sql\nSELECT weight FROM Dog WHERE age = (SELECT MIN(age) FROM Dog)\n```",
+      "extracted_sql": "SELECT weight FROM Dog WHERE age = (SELECT MIN(age) FROM Dog)",
+      "sql_valid": false,
+      "exact_match": false,
+      "execution_accuracy": false,
+      "execution_error": "no such table: Dog",
+      "latency_seconds": 1.252026170001045,
+      "input_tokens": 396,
+      "output_tokens": 20,
+      "schema_diagnostics": {
+        "original_table_count": 3,
+        "selected_table_count": 0,
+        "selected_column_count": 0,
+        "schema_string_length": 59,
+        "schema_reduction_ratio": 1.0,
+        "linking_success": false,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.3962343620005413,
+        "lexical_top_k_ids": [
+          [
+            "network_2",
+            "Who is the youngest male?"
+          ],
+          [
+            "ship_1",
+            "What is the name of the youngest captain?"
+          ],
+          [
+            "journal_committee",
+            "What is the name of the youngest editor?"
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "entrepreneur",
+            "What is the weight of the shortest person?"
+          ],
+          [
+            "entrepreneur",
+            "Return the weight of the shortest person."
+          ],
+          [
+            "candidate_poll",
+            "Find the average and minimum weight for each gender."
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "network_2",
+            "Who is the youngest male?"
+          ],
+          [
+            "network_2",
+            "What is the name of the youngest male?"
+          ],
+          [
+            "gymnast",
+            "What is the total point count of the youngest gymnast?"
+          ]
+        ],
+        "overlap_lex_sem": 0,
+        "fused_scores": [
+          0.894196646626557,
+          0.835132104741432,
+          0.8014466639670572
+        ]
+      }
+    },
+    {
+      "sample_id": "pets_1_49",
+      "db_id": "pets_1",
+      "question": "Find the maximum weight for each type of pet. List the maximum weight and pet type.",
+      "gold_sql": "SELECT max(weight) ,  petType FROM pets GROUP BY petType",
+      "generated_text": "```sql\nSELECT max(weight) ,  pet_type FROM pets GROUP BY pet_type\n```",
+      "extracted_sql": "SELECT max(weight) ,  pet_type FROM pets GROUP BY pet_type",
+      "sql_valid": false,
+      "exact_match": false,
+      "execution_accuracy": false,
+      "execution_error": "no such column: pet_type",
+      "latency_seconds": 1.252026170001045,
+      "input_tokens": 533,
+      "output_tokens": 20,
+      "schema_diagnostics": {
+        "original_table_count": 3,
+        "selected_table_count": 2,
+        "selected_column_count": 6,
+        "schema_string_length": 199,
+        "schema_reduction_ratio": 0.5714,
+        "linking_success": true,
+        "fallback_used": false,
+        "fk_expanded_tables": []
+      },
+      "retrieval_diagnostics": {
+        "strategy": "hybrid_score",
+        "alpha": 0.25,
+        "latency_seconds": 0.08516963100191788,
+        "lexical_top_k_ids": [
+          [
+            "document_management",
+            "Find the list of documents that are both in the most three popular type and have the most three popular structure."
+          ],
+          [
+            "music_2",
+            "Find all the vocal types."
+          ],
+          [
+            "store_1",
+            "List all media types."
+          ]
+        ],
+        "semantic_top_k_ids": [
+          [
+            "candidate_poll",
+            "Find the average and minimum weight for each gender."
+          ],
+          [
+            "candidate_poll",
+            "Count the number of people of each sex who have a weight higher than 85."
+          ],
+          [
+            "department_store",
+            "Find the number of different product types."
+          ]
+        ],
+        "hybrid_top_k_ids": [
+          [
+            "candidate_poll",
+            "Find the average and minimum weight for each gender."
+          ],
+          [
+            "department_store",
+            "Find the number of different product types."
+          ],
+          [
+            "product_catalog",
+            "Find the list of attribute data types possessed by more than 3 attribute definitions."
+          ]
+        ],
+        "overlap_lex_sem": 0,
+        "fused_scores": [
+          0.9351851851851851,
+          0.9276666666590672,
+          0.8803434960400924
+        ]
+      }
+    }
+  ]
+}

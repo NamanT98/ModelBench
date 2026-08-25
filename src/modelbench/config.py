@@ -20,7 +20,7 @@ _DEFAULT_CONFIG_FILENAME = "modelbench.yaml"
 
 # ── Nested config sections ──────────────────────────────────────────
 
-_VALID_PROVIDERS = {"huggingface"}
+_VALID_PROVIDERS = {"huggingface", "vllm"}
 _VALID_DEVICES = {"auto", "cpu", "cuda"}
 _VALID_DTYPES = {"auto", "float16", "float32", "bfloat16"}
 
@@ -84,6 +84,7 @@ class ModelConfig:
     revision: str = "main"
     device: str = "auto"
     dtype: str = "auto"
+    gpu_memory_utilization: float = 0.85
 
     def __post_init__(self) -> None:
         if self.provider not in _VALID_PROVIDERS:
@@ -116,12 +117,15 @@ class GenerationConfig:
     max_new_tokens: int = 256
     temperature: float = 0.0
     do_sample: bool = False
+    batch_size: int = 1
 
     def __post_init__(self) -> None:
         if self.max_new_tokens < 1:
             raise ValueError(f"max_new_tokens must be >= 1, got {self.max_new_tokens}")
         if self.temperature < 0:
             raise ValueError(f"temperature must be >= 0, got {self.temperature}")
+        if self.batch_size < 1:
+            raise ValueError(f"batch_size must be >= 1, got {self.batch_size}")
 
 
 # ── Top-level config ────────────────────────────────────────────────
