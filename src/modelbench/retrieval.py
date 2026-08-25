@@ -70,14 +70,15 @@ class JaccardSimilarityRetriever:
         except Exception as e:
             logger.warning("Failed to save Jaccard cache: %s", e)
 
-    def retrieve(self, question: str, k: int) -> list[TextToSQLSample]:
-        if k <= 0 or not self._index:
+    def retrieve_with_scores(self, question: str, k: int | None = None) -> list[tuple[TextToSQLSample, float]]:
+        if not self._index:
             return []
             
         target_tokens = _nltk_tokenize_question(question)
         if not target_tokens:
             # Fallback if question tokenizes to nothing (e.g., just punctuation)
-            return [sample for sample, _ in self._index[:k]]
+            limit = k if k is not None else len(self._index)
+            return [(sample, 0.0) for sample, _ in self._index[:limit]]
             
         scores: list[tuple[float, str, TextToSQLSample]] = []
         
@@ -95,7 +96,16 @@ class JaccardSimilarityRetriever:
         # Sort descending by score, then ascending by question string
         scores.sort(key=lambda x: (-x[0], x[1]))
         
-        return [sample for _, _, sample in scores[:k]]
+        if k is not None:
+            scores = scores[:k]
+            
+        return [(sample, score) for score, _, sample in scores]
+
+    def retrieve(self, question: str, k: int) -> list[TextToSQLSample]:
+        if k <= 0:
+            return []
+        scored = self.retrieve_with_scores(question, k)
+        return [sample for sample, _ in scored]
 
 
 class NumpyVectorIndex:
@@ -242,8 +252,8 @@ class EmbeddingRetriever:
             except Exception as e:
                 logger.warning("Failed to save embedding cache: %s", e)
                 
-    def retrieve(self, question: str, k: int) -> list[TextToSQLSample]:
-        if k <= 0 or self.index is None:
+    def retrieve_with_scores(self, question: str, k: int | None = None) -> list[tuple[TextToSQLSample, float]]:
+        if self.index is None:
             return []
             
         if self.model is None:
@@ -251,21 +261,202 @@ class EmbeddingRetriever:
                 raise ImportError("sentence-transformers is required")
             self.model = SentenceTransformer(self.embedding_model_id)
             
-        start = time.perf_counter()
-        
         # Must normalize query for cosine similarity via dot product
         query_embedding = self.model.encode(question, normalize_embeddings=True)
         
-        sample_ids, scores = self.index.search(query_embedding, k)
+        limit = k if k is not None else len(self.training_data)
+        sample_ids, scores = self.index.search(query_embedding, limit)
         
-        # Mapping ids back to TextToSQLSample
-        retrieved_samples = [self._sample_map[sid] for sid in sample_ids]
+        return [(self._sample_map[sid], float(score)) for sid, score in zip(sample_ids, scores)]
+
+    def retrieve(self, question: str, k: int) -> list[TextToSQLSample]:
+        if k <= 0:
+            return []
+        scored = self.retrieve_with_scores(question, k)
+        return [sample for sample, _ in scored]
+
+from modelbench.types import RetrievalResult
+
+class HybridRetriever:
+    """Retrieves examples using a hybrid of lexical and semantic signals."""
+    
+    def __init__(
+        self, 
+        lexical_retriever: ExampleRetriever, 
+        semantic_retriever: ExampleRetriever,
+        strategy: str,
+        alpha: float | None = None,
+        rrf_constant: int = 60,
+        union_n: int = 10
+    ):
+        self.lexical_retriever = lexical_retriever
+        self.semantic_retriever = semantic_retriever
+        self.strategy = strategy
+        self.alpha = alpha
+        self.rrf_constant = rrf_constant
+        self.union_n = union_n
+
+    def retrieve(self, question: str, k: int) -> RetrievalResult | list[TextToSQLSample]:
+        if k <= 0:
+            return []
+            
+        start = time.perf_counter()
         
-        # Store diagnostics on the instance for runner to pick up
-        self.last_retrieval_scores = scores
-        self.last_retrieval_latency = time.perf_counter() - start
-        
-        return retrieved_samples
+        if self.strategy == "hybrid_score":
+            if self.alpha is None:
+                raise ValueError("hybrid_alpha must be set for hybrid_score strategy")
+            
+            lex_all = self.lexical_retriever.retrieve_with_scores(question, k=None)
+            sem_all = self.semantic_retriever.retrieve_with_scores(question, k=None)
+            
+            lex_scores = [score for _, score in lex_all]
+            lex_min, lex_max = (min(lex_scores), max(lex_scores)) if lex_scores else (0, 0)
+            lex_dict = {}
+            for sample, score in lex_all:
+                key = (sample.db_id, sample.question)
+                if lex_max == lex_min:
+                    lex_dict[key] = 0.5
+                else:
+                    lex_dict[key] = (score - lex_min) / (lex_max - lex_min)
+            
+            sem_scores = [score for _, score in sem_all]
+            sem_min, sem_max = (min(sem_scores), max(sem_scores)) if sem_scores else (0, 0)
+            sem_dict = {}
+            for sample, score in sem_all:
+                key = (sample.db_id, sample.question)
+                if sem_max == sem_min:
+                    sem_dict[key] = 0.5
+                else:
+                    sem_dict[key] = (score - sem_min) / (sem_max - sem_min)
+                    
+            hybrid_scores = []
+            for sample, _ in lex_all:
+                key = (sample.db_id, sample.question)
+                l_score = lex_dict.get(key, 0.0)
+                s_score = sem_dict.get(key, 0.0)
+                h_score = self.alpha * l_score + (1 - self.alpha) * s_score
+                hybrid_scores.append((h_score, sample.question, sample, l_score, s_score))
+                
+            hybrid_scores.sort(key=lambda x: (-x[0], x[1]))
+            top_k = hybrid_scores[:k]
+            
+            lex_top_k = [sample for sample, _ in sorted(lex_all, key=lambda x: (-x[1], x[0].question))[:k]]
+            sem_top_k = [sample for sample, _ in sorted(sem_all, key=lambda x: (-x[1], x[0].question))[:k]]
+            overlap = len(set((s.db_id, s.question) for s in lex_top_k) & set((s.db_id, s.question) for s in sem_top_k))
+            
+            return RetrievalResult(
+                samples=[x[2] for x in top_k],
+                diagnostics={
+                    "strategy": self.strategy,
+                    "alpha": self.alpha,
+                    "latency_seconds": time.perf_counter() - start,
+                    "lexical_top_k_ids": [(s.db_id, s.question) for s in lex_top_k],
+                    "semantic_top_k_ids": [(s.db_id, s.question) for s in sem_top_k],
+                    "hybrid_top_k_ids": [(x[2].db_id, x[2].question) for x in top_k],
+                    "overlap_lex_sem": overlap,
+                    "fused_scores": [x[0] for x in top_k],
+                }
+            )
+            
+        elif self.strategy == "hybrid_rrf":
+            lex_all = self.lexical_retriever.retrieve_with_scores(question, k=None)
+            sem_all = self.semantic_retriever.retrieve_with_scores(question, k=None)
+            
+            lex_sorted = sorted(lex_all, key=lambda x: (-x[1], x[0].question))
+            sem_sorted = sorted(sem_all, key=lambda x: (-x[1], x[0].question))
+            
+            lex_ranks = { (s.db_id, s.question): i + 1 for i, (s, _) in enumerate(lex_sorted) }
+            sem_ranks = { (s.db_id, s.question): i + 1 for i, (s, _) in enumerate(sem_sorted) }
+            
+            hybrid_scores = []
+            for sample, _ in lex_all:
+                key = (sample.db_id, sample.question)
+                r_lex = lex_ranks.get(key, len(lex_all))
+                r_sem = sem_ranks.get(key, len(sem_all))
+                rrf_score = 1.0 / (self.rrf_constant + r_lex) + 1.0 / (self.rrf_constant + r_sem)
+                hybrid_scores.append((rrf_score, sample.question, sample, r_lex, r_sem))
+                
+            hybrid_scores.sort(key=lambda x: (-x[0], x[1]))
+            top_k = hybrid_scores[:k]
+            
+            overlap = len(set((s.db_id, s.question) for s, _ in lex_sorted[:k]) & set((s.db_id, s.question) for s, _ in sem_sorted[:k]))
+            
+            return RetrievalResult(
+                samples=[x[2] for x in top_k],
+                diagnostics={
+                    "strategy": self.strategy,
+                    "rrf_constant": self.rrf_constant,
+                    "latency_seconds": time.perf_counter() - start,
+                    "lexical_top_k_ids": [(s.db_id, s.question) for s, _ in lex_sorted[:k]],
+                    "semantic_top_k_ids": [(s.db_id, s.question) for s, _ in sem_sorted[:k]],
+                    "hybrid_top_k_ids": [(x[2].db_id, x[2].question) for x in top_k],
+                    "overlap_lex_sem": overlap,
+                    "fused_scores": [x[0] for x in top_k],
+                }
+            )
+            
+        elif self.strategy == "hybrid_union":
+            lex_all = self.lexical_retriever.retrieve_with_scores(question, k=None)
+            sem_all = self.semantic_retriever.retrieve_with_scores(question, k=None)
+            
+            lex_sorted = sorted(lex_all, key=lambda x: (-x[1], x[0].question))
+            sem_sorted = sorted(sem_all, key=lambda x: (-x[1], x[0].question))
+            
+            lex_top_n = lex_sorted[:self.union_n]
+            sem_top_n = sem_sorted[:self.union_n]
+            
+            union_keys = set((s.db_id, s.question) for s, _ in lex_top_n) | set((s.db_id, s.question) for s, _ in sem_top_n)
+            
+            union_pool = {}
+            for s, score in lex_all:
+                key = (s.db_id, s.question)
+                if key in union_keys:
+                    union_pool[key] = {"sample": s, "lex": score}
+            for s, score in sem_all:
+                key = (s.db_id, s.question)
+                if key in union_keys:
+                    union_pool[key]["sem"] = score
+                    
+            lex_scores = [v.get("lex", 0.0) for v in union_pool.values()]
+            sem_scores = [v.get("sem", 0.0) for v in union_pool.values()]
+            
+            lex_min, lex_max = (min(lex_scores), max(lex_scores)) if lex_scores else (0, 0)
+            sem_min, sem_max = (min(sem_scores), max(sem_scores)) if sem_scores else (0, 0)
+            
+            hybrid_scores = []
+            for key, v in union_pool.items():
+                s = v["sample"]
+                l_score = v.get("lex", 0.0)
+                s_score = v.get("sem", 0.0)
+                
+                norm_l = 0.5 if lex_max == lex_min else (l_score - lex_min) / (lex_max - lex_min)
+                norm_s = 0.5 if sem_max == sem_min else (s_score - sem_min) / (sem_max - sem_min)
+                
+                h_score = 0.5 * norm_l + 0.5 * norm_s
+                hybrid_scores.append((h_score, s.question, s))
+                
+            hybrid_scores.sort(key=lambda x: (-x[0], x[1]))
+            top_k = hybrid_scores[:k]
+            
+            overlap = len(set((s.db_id, s.question) for s, _ in lex_sorted[:k]) & set((s.db_id, s.question) for s, _ in sem_sorted[:k]))
+            
+            return RetrievalResult(
+                samples=[x[2] for x in top_k],
+                diagnostics={
+                    "strategy": self.strategy,
+                    "union_n": self.union_n,
+                    "candidates_considered": len(union_pool),
+                    "latency_seconds": time.perf_counter() - start,
+                    "lexical_top_k_ids": [(s.db_id, s.question) for s, _ in lex_sorted[:k]],
+                    "semantic_top_k_ids": [(s.db_id, s.question) for s, _ in sem_sorted[:k]],
+                    "hybrid_top_k_ids": [(x[2].db_id, x[2].question) for x in top_k],
+                    "overlap_lex_sem": overlap,
+                    "fused_scores": [x[0] for x in top_k],
+                }
+            )
+            
+        else:
+            raise ValueError(f"Unknown hybrid strategy: {self.strategy}")
 
 
 def create_retriever(
@@ -281,4 +472,19 @@ def create_retriever(
         if not embedding_model:
             raise ValueError("embedding_model must be provided for the 'embedding' strategy")
         return EmbeddingRetriever(training_data, embedding_model_id=embedding_model)
+    elif strategy.startswith("hybrid_"):
+        lexical = JaccardSimilarityRetriever(training_data)
+        embedding_model = kwargs.get("embedding_model")
+        if not embedding_model:
+            raise ValueError("embedding_model must be provided for hybrid strategies")
+        semantic = EmbeddingRetriever(training_data, embedding_model_id=embedding_model)
+        
+        return HybridRetriever(
+            lexical_retriever=lexical,
+            semantic_retriever=semantic,
+            strategy=strategy,
+            alpha=kwargs.get("hybrid_alpha"),
+            rrf_constant=kwargs.get("hybrid_rrf_constant", 60),
+            union_n=kwargs.get("hybrid_union_n", 10)
+        )
     raise ValueError(f"Unsupported retrieval strategy: {strategy!r}")

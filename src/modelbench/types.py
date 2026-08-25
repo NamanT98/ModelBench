@@ -27,6 +27,19 @@ class TextToSQLSample:
 
 
 @dataclass(frozen=True)
+class RetrievalResult:
+    """Result of retrieving examples for a query.
+    
+    Attributes:
+        samples: The top-k selected demonstrations.
+        diagnostics: Optional diagnostic metadata (e.g., scores, latencies, strategies).
+    """
+    
+    samples: list[TextToSQLSample]
+    diagnostics: dict[str, object]
+
+
+@dataclass(frozen=True)
 class QueryResult:
     """Result of executing a SQL query against a database.
 

@@ -15,7 +15,7 @@ from modelbench.extract import SQLExtractionError, extract_sql
 from modelbench.model import create_model
 from modelbench.prompt import build_text_to_sql_prompt
 from modelbench.schema import create_schema_strategy, introspect_database
-from modelbench.types import ExperimentMetadata, ExperimentResult, SampleResult
+from modelbench.types import ExperimentMetadata, ExperimentResult, SampleResult, RetrievalResult
 
 logger = logging.getLogger(__name__)
 
@@ -59,7 +59,10 @@ class ExperimentRunner:
             self.retriever = create_retriever(
                 self.config.strategy.retriever, 
                 train_samples,
-                embedding_model=self.config.strategy.embedding_model
+                embedding_model=self.config.strategy.embedding_model,
+                hybrid_alpha=self.config.strategy.hybrid_alpha,
+                hybrid_rrf_constant=self.config.strategy.hybrid_rrf_constant,
+                hybrid_union_n=self.config.strategy.hybrid_union_n
             )
 
     @property
@@ -130,8 +133,19 @@ class ExperimentRunner:
             retrieval_diag = None
             if self.retriever is not None:
                 start_retrieval = time.perf_counter()
-                retrieved_samples = self.retriever.retrieve(sample.question, self.config.strategy.k)
+                retrieval_response = self.retriever.retrieve(sample.question, self.config.strategy.k)
                 retrieval_latency = time.perf_counter() - start_retrieval
+                
+                if isinstance(retrieval_response, RetrievalResult):
+                    retrieved_samples = retrieval_response.samples
+                    retrieval_diag = retrieval_response.diagnostics
+                else:
+                    retrieved_samples = retrieval_response
+                    retrieval_diag = {
+                        "k": self.config.strategy.k,
+                        "retrieved": len(retrieved_samples),
+                        "latency_seconds": retrieval_latency,
+                    }
                 
                 examples = []
                 for ex_sample in retrieved_samples:
@@ -148,17 +162,6 @@ class ExperimentRunner:
                     if ex_db_schema is not None:
                         ex_schema_str = self.schema_strategy.get_schema_string(ex_db_schema, ex_sample.question)
                     examples.append((ex_sample, ex_schema_str))
-                    
-                retrieval_diag = {
-                    "k": self.config.strategy.k,
-                    "retrieved": len(retrieved_samples),
-                    "latency_seconds": getattr(self.retriever, "last_retrieval_latency", retrieval_latency),
-                }
-                
-                if hasattr(self.retriever, "last_retrieval_scores"):
-                    retrieval_diag["scores"] = self.retriever.last_retrieval_scores
-                if hasattr(self.retriever, "embedding_model_id"):
-                    retrieval_diag["embedding_model"] = self.retriever.embedding_model_id
 
             prompt = build_text_to_sql_prompt(sample.question, schema_str, examples)
 

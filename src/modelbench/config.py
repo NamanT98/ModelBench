@@ -53,6 +53,9 @@ class StrategyConfig:
     k: int = 3
     train_split: str = "train"
     embedding_model: str | None = None
+    hybrid_alpha: float | None = None
+    hybrid_rrf_constant: int = 60
+    hybrid_union_n: int = 10
 
 
 @dataclass

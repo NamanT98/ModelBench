@@ -1,0 +1,20 @@
+experiment:
+  name: spider_qwen_m7_hybrid_score_alpha75
+dataset:
+  name: spider
+  split: dev
+  limit: null
+model:
+  provider: huggingface
+  model_id: Qwen/Qwen2.5-Coder-3B-Instruct
+generation:
+  max_new_tokens: 256
+  temperature: 0.0
+schema:
+  strategy: schema_linking_normalized
+strategy:
+  name: few_shot
+  retriever: hybrid_score
+  hybrid_alpha: 0.75
+  embedding_model: BAAI/bge-small-en-v1.5
+  k: 3
