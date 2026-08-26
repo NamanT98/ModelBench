@@ -189,27 +189,6 @@ class TestHuggingFaceCausalLM:
         assert model._gen_config.max_new_tokens == 512
 
 
-# ── VLLMModel construction tests ────────────────────────────────────────
-
-class TestVLLMModel:
-    """Test VLLMModel without loading any real model."""
-
-    def test_lazy_loading(self) -> None:
-        """Constructing the adapter must NOT load the model."""
-        from modelbench.model import VLLMModel
-        model = VLLMModel(ModelConfig(provider="vllm"), GenerationConfig())
-        assert model._llm is None
-        assert model._tokenizer is None
-
-    def test_model_id_property(self) -> None:
-        from modelbench.model import VLLMModel
-        model = VLLMModel(
-            ModelConfig(provider="vllm", model_id="custom/model"),
-            GenerationConfig(),
-        )
-        assert model.model_id == "custom/model"
-
-
 # ── create_model factory tests ──────────────────────────────────────
 
 
@@ -219,12 +198,6 @@ class TestCreateModel:
     def test_creates_huggingface_model(self) -> None:
         model = create_model(ModelConfig(provider="huggingface"), GenerationConfig())
         assert isinstance(model, HuggingFaceCausalLM)
-        assert model.model_id == "Qwen/Qwen2.5-Coder-3B-Instruct"
-
-    def test_creates_vllm_model(self) -> None:
-        from modelbench.model import VLLMModel
-        model = create_model(ModelConfig(provider="vllm"), GenerationConfig())
-        assert isinstance(model, VLLMModel)
         assert model.model_id == "Qwen/Qwen2.5-Coder-3B-Instruct"
 
     def test_unsupported_provider_raises(self) -> None:

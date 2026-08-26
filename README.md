@@ -1,146 +1,113 @@
 # ModelBench
 
-**LLM experimentation and evaluation platform.**
+ModelBench is a specialized evaluation and experimentation platform designed to investigate and optimize few-shot retrieval and schema linking strategies for Local LLM Text-to-SQL generation.
 
-ModelBench is a framework for systematically comparing LLM approaches to structured tasks. It provides reproducible experiment pipelines, automated evaluation metrics, and clear comparisons across model configurations.
+## The Problem
+Generating SQL from natural language is notoriously difficult for small, local language models (like the 3B parameter `Qwen2.5-Coder-3B-Instruct`). They frequently suffer from schema hallucination, get confused by large database schemas, and struggle to generalize without highly relevant few-shot examples. 
 
-## Why Text-to-SQL?
+ModelBench exists to answer the question: **How can we maximize Text-to-SQL performance on small, locally-hosted LLMs through advanced retrieval and schema normalization?**
 
-Version 1 focuses exclusively on **Text-to-SQL** — translating natural language questions into executable SQL queries. This is an ideal first task because:
+## Architecture
 
-- **Objectively measurable**: SQL queries can be executed against databases, and results can be compared directly. No subjective evaluation needed.
-- **Rich design space**: Prompting strategies (zero-shot, few-shot), retrieval-augmented generation (schema retrieval), and fine-tuning (QLoRA/PEFT) all apply, making it a strong testbed for comparing approaches.
-- **Well-established benchmarks**: Datasets like Spider and BIRD provide standardized evaluation with known baselines.
-- **Practical relevance**: Text-to-SQL has clear real-world applications in data analytics and business intelligence.
+ModelBench uses a multi-stage pipeline designed to strip away irrelevant noise and provide the LLM with the most pristine, relevant context possible.
 
-## Evaluation: Why Execution Accuracy?
-
-ModelBench uses **execution accuracy** as its primary evaluation metric. This means: we execute both the predicted SQL and the gold-standard SQL against the same database, then compare the result sets.
-
-This is more meaningful than **exact match** (comparing SQL strings) because many different SQL queries can produce the same correct result:
-
-```
-Gold:      SELECT DISTINCT c.name FROM customers c JOIN orders o ON c.customer_id = o.customer_id
-Predicted: SELECT DISTINCT name FROM customers WHERE customer_id IN (SELECT customer_id FROM orders)
-```
-
-These two queries are textually different but semantically equivalent — both correctly answer "which customers have placed orders?" Exact match would score this as a failure; execution accuracy correctly scores it as a success.
-
-### Text-to-SQL Evaluation Flow
-
-```
-Predicted SQL ──→ Execute against SQLite ──→ Predicted Result
-                                                    │
-                                                    ▼
-                                              Compare Results ──→ Execution Accuracy
-                                                    ▲
-                                                    │
-Gold SQL ────────→ Execute against SQLite ──→ Gold Result
+```mermaid
+graph TD
+    Q[Natural Language Question] --> SL[NLP-Normalized Schema Linking]
+    DB[(Database Schema)] --> SL
+    
+    SL --> FS[Schema Filtering]
+    FS --> P[Filtered Schema]
+    
+    Q --> JR[Lexical Jaccard Retrieval]
+    Q --> SR[Semantic Embedding Retrieval]
+    
+    C[(7000+ Training Examples)] --> JR
+    C --> SR
+    
+    JR --> |Top 25| RRF{Hybrid Reciprocal Rank Fusion}
+    SR --> |Top 25| RRF
+    
+    RRF --> |Top 3| P
+    P --> |Prompt| LLM[Qwen2.5-Coder-3B-Instruct]
+    LLM --> SQL[Generated SQL]
 ```
 
-Additional metrics are also computed:
-- **SQL validity** — does the predicted SQL execute without error?
-- **Exact match** — does the normalized SQL string match the gold standard?
+## Experimental Results
+Through systematic experimentation on the official 1,034-sample Spider dev split, we evaluated several strategies. The central finding of V1 is that **hybrid retrieval using Reciprocal Rank Fusion (M7-RRF) vastly outperforms independent lexical or semantic retrieval.**
 
-## Research Questions
+| Strategy | Execution Accuracy | SQL Validity | Exact Match |
+|:---|---:|---:|---:|
+| **Zero-Shot** (NLP-Normalized Schema Linking) `[M4-B.1]` | 42.50% | 83.50% | 12.10% |
+| **Lexical** (Jaccard) `[M5]` | 55.13% | 84.04% | 27.85% |
+| **Semantic** (BGE Embeddings) `[M6]` | 55.90% | 84.04% | 27.47% |
+| **Hybrid RRF** (Lexical + Semantic) `[M7-RRF]` | **58.03%** | **85.88%** | **29.50%** |
 
-ModelBench V1 is designed to answer:
+*Note: On the evaluated Spider dev split, optimizing the RRF candidate pool to just `N=25` produced exactly the same top-3 retrieval results as exhaustive full-corpus RRF, effectively eliminating retrieval latency while preserving the 58.03% ground-truth accuracy.*
 
-| Question | Approach |
-|---|---|
-| Does fine-tuning improve Text-to-SQL accuracy? | Compare zero-shot vs. QLoRA fine-tuned models |
-| Does schema retrieval help? | Compare with/without schema context retrieval |
-| Does fine-tuning + retrieval outperform either alone? | Factorial comparison |
-| How well do models generalize to unseen databases? | Cross-database evaluation splits |
-| What are the practical trade-offs? | Measure latency, token usage, and context size alongside accuracy |
+## Getting Started
 
-## Development Roadmap
+### Installation
+1. Clone the repository and navigate into it.
+2. Create and activate a conda environment:
+   ```bash
+   conda create -n modelbench python=3.11
+   conda activate modelbench
+   ```
+3. Install the package and its dependencies:
+   ```bash
+   pip install -e '.[all]'
+   ```
 
-| Milestone | Description | Status |
-|---|---|---|
-| **M0** | Project foundation, packaging, CLI, config, logging | ✅ Complete |
-| **M1** | SQLite execution, SQL normalization, evaluation engine, fixture benchmark | ✅ Current |
-| M2 | Dataset loading (Spider/BIRD), schema parsing | Planned |
-| M3 | Model adapter for local inference (e.g., CodeLlama, StarCoder) | Planned |
-| M4 | Prompt strategies (zero-shot, few-shot) | Planned |
-| M5 | Schema retrieval pipeline | Planned |
-| M6 | QLoRA/PEFT fine-tuning integration | Planned |
-| M7 | Experiment runner and MLflow tracking | Planned |
-| M8 | FastAPI backend + React frontend | Planned |
-
-> **Note:** The fixture evaluation included in M1 uses a small, internal e-commerce database. It is **not** a real benchmark like Spider or BIRD — it exists to verify the evaluation pipeline works correctly during development.
-
-## Quick Start
-
+### Running an Experiment
+To run the final, optimized V1 pipeline (Hybrid RRF Retrieval + NLP-Normalized Schema Linking):
 ```bash
-# Install in development mode
-pip install -e ".[dev]"
-
-# Run the CLI
-modelbench --version
-modelbench info
-
-# Run the fixture evaluation
-modelbench evaluate-fixture
-
-# Run tests
-pytest
-
-# Lint and format
-ruff check src/ tests/
-ruff format src/ tests/
+modelbench run --config configs/spider_qwen_hybrid_rrf_v1.yaml
 ```
 
-### Example: Fixture Evaluation Output
+The system will:
+1. Initialize the dataset and models.
+2. Run inference across the specified split.
+3. Automatically execute and evaluate the generated SQL against the ground-truth database.
+4. Save the results to `results/spider_qwen_hybrid_rrf_v1.json`.
 
-```
-ModelBench Text-to-SQL Fixture Evaluation
-============================================
+### Reproducing V1 Results
+All historical experimental configurations are preserved in the `configs/` directory. You can reproduce the exact progression by running:
+- `configs/m4_b1_linking.yaml`
+- `configs/m5_few_shot_k3.yaml`
+- `configs/m6_embedding_k3.yaml`
+- `configs/spider_qwen_hybrid_rrf_v1.yaml`
 
-  [✓] 1. How many customers are there?
-  [✓] 2. What is the total revenue from all orders?
-  [✓] 3. Which customers have placed at least one order?
-  [✓] 4. How many orders has each customer placed?
-  [✓] 5. List all product names and prices.
+## Repository Structure
 
-Samples:            5
-SQL Validity:       5/5 (100%)
-Exact Match:        2/5 (40%)
-Execution Accuracy: 5/5 (100%)
-```
-
-Notice that exact match is only 40% while execution accuracy is 100% — three of the predicted queries use different SQL syntax but produce the same correct result. This is precisely why execution accuracy is the primary metric.
-
-## Project Structure
-
-```
-modelbench/
-├── src/
-│   └── modelbench/
-│       ├── __init__.py        # Package init, version
-│       ├── cli.py             # CLI entry point (click)
-│       ├── config.py          # YAML configuration management
-│       ├── logging.py         # Logging setup
-│       ├── types.py           # Domain types (TextToSQLSample, EvaluationResult, etc.)
-│       ├── db.py              # SQLite query execution
-│       ├── sql.py             # SQL normalization for exact match
-│       ├── evaluation.py      # Evaluation engine (result comparison, evaluate_sample)
-│       └── fixture.py         # Fixture database and sample definitions
-├── tests/
-│   ├── conftest.py            # Shared test fixtures
-│   ├── test_cli.py
-│   ├── test_config.py
-│   ├── test_logging.py
-│   ├── test_db.py             # Database executor tests
-│   ├── test_sql.py            # SQL normalization tests
-│   └── test_evaluation.py     # Evaluation pipeline tests
-├── configs/
-├── datasets/
-├── scripts/
-├── pyproject.toml
-└── README.md
+```text
+ModelBench/
+├── configs/                  # YAML experiment configurations
+│   ├── experimental/         # Historical and deprecated configs
+│   ├── spider_qwen_hybrid_rrf_v1.yaml  # Final V1 pipeline
+│   └── ...
+├── datasets/                 # Local datasets (e.g., Spider)
+├── docs/                     # Architectural and experimental reports
+├── results/                  # Generated JSON evaluation outputs
+├── scripts/                  # Utility and smoke test scripts
+├── src/modelbench/           # Core Python package
+│   ├── model.py              # LLM inference adapters
+│   ├── retrieval.py          # Few-shot retrievers (Lexical, Semantic, Hybrid)
+│   ├── schema.py             # Schema linking algorithms
+│   └── ...
+└── tests/                    # Pytest validation suite
 ```
 
-## License
+- `src/modelbench/`: Core platform code (models, retrieval, evaluation, CLI).
+- `configs/`: YAML configuration files defining experiments.
+- `datasets/`: Dataset storage (e.g., Spider).
+- `docs/`: In-depth analysis reports and architectural documentation.
+- `results/`: Output JSONs containing metrics and individual sample predictions.
+- `tests/`: Comprehensive test suite verifying logic, schemas, and determinism.
 
-MIT
+## Future Directions (V2)
+While V1 establishes a robust baseline for Text-to-SQL on Spider, V2 will explore:
+- Execution-guided generation and reflection (multi-turn).
+- Fine-tuning dataset generation.
+- Cross-domain generalization (BIRD dataset).
+- High-throughput inference integration (vLLM).

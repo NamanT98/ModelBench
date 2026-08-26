@@ -75,9 +75,8 @@ class ModelConfig:
         provider: Model backend. Currently only ``"huggingface"``.
         model_id: Hugging Face model identifier (e.g. ``"Qwen/Qwen2.5-Coder-3B-Instruct"``).
         revision: Model revision / git branch.
-        device: ``"auto"`` (CUDA if available, else CPU), ``"cpu"``, or ``"cuda"``.
-        dtype: ``"auto"`` (float16 on CUDA, float32 on CPU), ``"float16"``,
-            ``"float32"``, or ``"bfloat16"``.
+        device: Device to run the model on (``"auto"``, ``"cuda"``, ``"cpu"``).
+        dtype: Data type for model weights (``"auto"``, ``"float16"``, ``"bfloat16"``, etc.).
     """
 
     provider: str = "huggingface"
@@ -85,7 +84,6 @@ class ModelConfig:
     revision: str = "main"
     device: str = "auto"
     dtype: str = "auto"
-    gpu_memory_utilization: float = 0.85
 
     def __post_init__(self) -> None:
         if self.provider not in _VALID_PROVIDERS:

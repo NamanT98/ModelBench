@@ -43,5 +43,9 @@ datasets/*.sqlite
 mlruns/
 mlartifacts/
 
-datasets/spider
+datasets/spider/
 docs/
+results/
+scratch/
+.embedding_cache_v1.*
+.jaccard_cache.pkl
