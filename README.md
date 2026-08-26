@@ -59,6 +59,24 @@ Through systematic experimentation on the official 1,034-sample Spider dev split
    pip install -e '.[all]'
    ```
 
+### Dataset Setup
+ModelBench relies on the official Spider dataset for Text-to-SQL evaluation. For our experiments, we used the dataset mirror available on Kaggle.
+1. Download the Spider dataset from [Kaggle](https://www.kaggle.com/datasets/jeromeblanchet/yale-universitys-spider-10-nlp-dataset) (or the [official website](https://yale-lily.github.io/spider)).
+2. Extract the downloaded archive.
+3. Place the contents into the `datasets/spider/` directory in this project. 
+   
+Your structure should look like this:
+```text
+datasets/spider/
+├── train_spider.json
+├── dev.json
+├── tables.json
+└── database/
+    ├── concert_singer/
+    │   └── concert_singer.sqlite
+    └── ...
+```
+
 ### Running an Experiment
 To run the final, optimized V1 pipeline (Hybrid RRF Retrieval + NLP-Normalized Schema Linking):
 ```bash
