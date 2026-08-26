@@ -22,7 +22,7 @@ We evaluated two families of Hybrid Retrieval against the established M5 and M6 
 
 | Strategy                     |   SQL Validity (%) |   Exact Match (%) |   Execution Accuracy (%) |
 |:-----------------------------|-------------------:|------------------:|-------------------------:|
-| **M5 BM25 (K=3)**            |              84.04 |             27.85 |                    55.13 |
+| **M5 Jaccard (K=3)**            |              84.04 |             27.85 |                    55.13 |
 | **M6 Embed (K=3)**           |              84.04 |             27.47 |                    55.90 |
 | **M7 Hybrid Score (α=0.25)** |              84.82 |             29.01 |                    57.16 |
 | **M7 Hybrid Score (α=0.50)** |              85.30 |             28.05 |                    55.03 |

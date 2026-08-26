@@ -45,7 +45,7 @@ Provides the model with `k=3` dynamically retrieved few-shot examples based on J
 Uses dense embeddings (`BAAI/bge-small-en-v1.5`) and cosine similarity. While Jaccard similarity struggles with synonyms, dense embeddings retrieve examples that better match the underlying *meaning* and *intent* of the user's question.
 
 **4. Hybrid Reciprocal Rank Fusion (M7-RRF)**
-The final and most successful strategy fuses both Lexical and Semantic retrievals. Rather than normalizing raw scores (which operate in fundamentally different mathematical spaces), ModelBench uses **Reciprocal Rank Fusion (RRF)**. RRF assigns a score based purely on the candidate's rank in each retriever's list. To eliminate latency, we cap the candidate pool to just `N=25` top examples from each retriever before applying RRF. This bounded pool mathematically guarantees the exact same Top-3 examples as an exhaustive full-corpus search, dropping retrieval latency from ~14 seconds to ~0.24 seconds.
+The final and most successful strategy fuses both Lexical and Semantic retrievals. Rather than normalizing raw scores (which operate in fundamentally different mathematical spaces), ModelBench uses **Reciprocal Rank Fusion (RRF)**. RRF assigns a score based purely on the candidate's rank in each retriever's list. To eliminate latency, we cap the candidate pool to just `N=25` top examples from each retriever before applying RRF. On the full 1,034-query Spider dev set, `N=25` produced exactly the same Top-3 retrieved examples as exhaustive RRF, dropping retrieval latency from ~14 seconds to ~0.24 seconds.
 
 ## Experimental Results
 Through systematic experimentation on the official 1,034-sample Spider dev split, we evaluated several strategies. The central finding of V1 is that **hybrid retrieval using Reciprocal Rank Fusion (M7-RRF) vastly outperforms independent lexical or semantic retrieval.**
@@ -136,6 +136,10 @@ ModelBench/
 - `docs/`: In-depth analysis reports and architectural documentation.
 - `results/`: Output JSONs containing metrics and individual sample predictions.
 - `tests/`: Comprehensive test suite verifying logic, schemas, and determinism.
+
+## V1 Scope
+
+ModelBench V1 focuses exclusively on Text-to-SQL retrieval experimentation using Spider 1.0 and Qwen2.5-Coder-3B-Instruct. V1 evaluates schema linking, lexical retrieval, semantic retrieval, and hybrid retrieval. Vector databases, multi-task evaluation, production serving, and experiment tracking are intentionally outside the scope of V1.
 
 ## Future Directions (V2)
 While V1 establishes a robust baseline for Text-to-SQL on Spider, V2 will explore:
