@@ -39,7 +39,7 @@ graph TD
 Instead of injecting the entire database schema into the prompt (which easily confuses small models and overflows context windows), ModelBench lemmatizes both the natural language question and the schema tables/columns using NLTK WordNet. It retains only the tables and columns that have direct or stemmed lexical overlap with the question. Crucially, it preserves all foreign key relationships between retained tables to ensure the model understands join paths.
 
 **2. Lexical Retrieval (Jaccard)**
-Provides the model with `k=3` dynamically retrieved few-shot examples based on Jaccard similarity of lemmatized bigrams. This strategy is excellent at finding exact structural overlap and domain-specific terminology matches, anchoring the model to the database's specific query patterns.
+Provides the model with `k=3` dynamically retrieved few-shot examples based on Jaccard similarity of lemmatized tokens. This strategy is excellent at finding exact structural overlap and domain-specific terminology matches, anchoring the model to the database's specific query patterns.
 
 **3. Semantic Embedding Retrieval (BGE)**
 Uses dense embeddings (`BAAI/bge-small-en-v1.5`) and cosine similarity. While Jaccard similarity struggles with synonyms, dense embeddings retrieve examples that better match the underlying *meaning* and *intent* of the user's question.
