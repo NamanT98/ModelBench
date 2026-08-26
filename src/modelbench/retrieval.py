@@ -291,7 +291,8 @@ class HybridRetriever:
         strategy: str,
         alpha: float | None = None,
         rrf_constant: int = 60,
-        union_n: int = 10
+        union_n: int = 10,
+        candidate_n: int | None = None
     ):
         self.lexical_retriever = lexical_retriever
         self.semantic_retriever = semantic_retriever
@@ -299,6 +300,7 @@ class HybridRetriever:
         self.alpha = alpha
         self.rrf_constant = rrf_constant
         self.union_n = union_n
+        self.candidate_n = candidate_n
 
     def retrieve(self, question: str, k: int) -> RetrievalResult | list[TextToSQLSample]:
         if k <= 0:
@@ -363,8 +365,8 @@ class HybridRetriever:
             )
             
         elif self.strategy == "hybrid_rrf":
-            lex_all = self.lexical_retriever.retrieve_with_scores(question, k=None)
-            sem_all = self.semantic_retriever.retrieve_with_scores(question, k=None)
+            lex_all = self.lexical_retriever.retrieve_with_scores(question, k=self.candidate_n)
+            sem_all = self.semantic_retriever.retrieve_with_scores(question, k=self.candidate_n)
             
             lex_sorted = sorted(lex_all, key=lambda x: (-x[1], x[0].question))
             sem_sorted = sorted(sem_all, key=lambda x: (-x[1], x[0].question))
@@ -372,12 +374,20 @@ class HybridRetriever:
             lex_ranks = { (s.db_id, s.question): i + 1 for i, (s, _) in enumerate(lex_sorted) }
             sem_ranks = { (s.db_id, s.question): i + 1 for i, (s, _) in enumerate(sem_sorted) }
             
+            sample_map = { (s.db_id, s.question): s for s, _ in lex_sorted }
+            sample_map.update({ (s.db_id, s.question): s for s, _ in sem_sorted })
+            
             hybrid_scores = []
-            for sample, _ in lex_all:
-                key = (sample.db_id, sample.question)
-                r_lex = lex_ranks.get(key, len(lex_all))
-                r_sem = sem_ranks.get(key, len(sem_all))
-                rrf_score = 1.0 / (self.rrf_constant + r_lex) + 1.0 / (self.rrf_constant + r_sem)
+            for key, sample in sample_map.items():
+                r_lex = lex_ranks.get(key)
+                r_sem = sem_ranks.get(key)
+                
+                rrf_score = 0.0
+                if r_lex is not None:
+                    rrf_score += 1.0 / (self.rrf_constant + r_lex)
+                if r_sem is not None:
+                    rrf_score += 1.0 / (self.rrf_constant + r_sem)
+                
                 hybrid_scores.append((rrf_score, sample.question, sample, r_lex, r_sem))
                 
             hybrid_scores.sort(key=lambda x: (-x[0], x[1]))
@@ -390,6 +400,7 @@ class HybridRetriever:
                 diagnostics={
                     "strategy": self.strategy,
                     "rrf_constant": self.rrf_constant,
+                    "candidate_n": self.candidate_n,
                     "latency_seconds": time.perf_counter() - start,
                     "lexical_top_k_ids": [(s.db_id, s.question) for s, _ in lex_sorted[:k]],
                     "semantic_top_k_ids": [(s.db_id, s.question) for s, _ in sem_sorted[:k]],
@@ -489,6 +500,7 @@ def create_retriever(
             strategy=strategy,
             alpha=kwargs.get("hybrid_alpha"),
             rrf_constant=kwargs.get("hybrid_rrf_constant", 60),
-            union_n=kwargs.get("hybrid_union_n", 10)
+            union_n=kwargs.get("hybrid_union_n", 10),
+            candidate_n=kwargs.get("hybrid_candidate_n")
         )
     raise ValueError(f"Unsupported retrieval strategy: {strategy!r}")
