@@ -33,6 +33,20 @@ graph TD
     LLM --> SQL[Generated SQL]
 ```
 
+### Core Strategies
+
+**1. NLP-Normalized Schema Linking (Zero-Shot Baseline)**
+Instead of injecting the entire database schema into the prompt (which easily confuses small models and overflows context windows), ModelBench lemmatizes both the natural language question and the schema tables/columns using NLTK WordNet. It retains only the tables and columns that have direct or stemmed lexical overlap with the question. Crucially, it preserves all foreign key relationships between retained tables to ensure the model understands join paths.
+
+**2. Lexical Retrieval (Jaccard)**
+Provides the model with `k=3` dynamically retrieved few-shot examples based on Jaccard similarity of lemmatized bigrams. This strategy is excellent at finding exact structural overlap and domain-specific terminology matches, anchoring the model to the database's specific query patterns.
+
+**3. Semantic Embedding Retrieval (BGE)**
+Uses dense embeddings (`BAAI/bge-small-en-v1.5`) and cosine similarity. While Jaccard similarity struggles with synonyms, dense embeddings retrieve examples that better match the underlying *meaning* and *intent* of the user's question.
+
+**4. Hybrid Reciprocal Rank Fusion (M7-RRF)**
+The final and most successful strategy fuses both Lexical and Semantic retrievals. Rather than normalizing raw scores (which operate in fundamentally different mathematical spaces), ModelBench uses **Reciprocal Rank Fusion (RRF)**. RRF assigns a score based purely on the candidate's rank in each retriever's list. To eliminate latency, we cap the candidate pool to just `N=25` top examples from each retriever before applying RRF. This bounded pool mathematically guarantees the exact same Top-3 examples as an exhaustive full-corpus search, dropping retrieval latency from ~14 seconds to ~0.24 seconds.
+
 ## Experimental Results
 Through systematic experimentation on the official 1,034-sample Spider dev split, we evaluated several strategies. The central finding of V1 is that **hybrid retrieval using Reciprocal Rank Fusion (M7-RRF) vastly outperforms independent lexical or semantic retrieval.**
 
