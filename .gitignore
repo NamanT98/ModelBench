@@ -44,7 +44,6 @@ mlruns/
 mlartifacts/
 
 datasets/spider/
-docs/
 results/
 scratch/
 .embedding_cache_v1.*
